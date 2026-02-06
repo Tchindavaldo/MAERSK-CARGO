@@ -59,5 +59,5 @@ CREATE POLICY "Authenticated users can insert site settings"
 
 -- Insert default site settings if not exists
 INSERT INTO jongleur_maersk_site_settings (site_email, site_phone, site_address, support_email, company_name)
-VALUES ('contact@jongleur-maersk.com', '+1 234 567 8900', 'Logistics Hub', 'support@jongleur-maersk.com', 'Jongleur Maersk')
+VALUES ('contact@maersk-cargo.com', '+1 639 526 1121', 'Logistics Hub', 'support@jongleur-maersk.com', 'Jongleur Maersk')
 ON CONFLICT DO NOTHING;

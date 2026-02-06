@@ -47,9 +47,9 @@ export default function Header() {
               <Mail size={14} className="text-brand-accent" />
               {settings.site_email || 'contact@maerskaircargo.com'}
             </a>
-            <a href={`tel:${settings.site_phone || '+1 234 567 8900'}`} className="flex items-center gap-2 hover:text-brand-accent transition cursor-pointer">
+            <a href={`tel:${settings.site_phone || '+1 639 526 1121'}`} className="flex items-center gap-2 hover:text-brand-accent transition cursor-pointer">
               <Phone size={14} className="text-brand-accent" />
-              {settings.site_phone || '+1 234 567 8900'}
+              {settings.site_phone || '+1 639 526 1121'}
             </a>
           </div>
           <div className="flex items-center gap-4">

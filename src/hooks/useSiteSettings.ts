@@ -12,10 +12,10 @@ interface SiteSettings {
 
 export function useSiteSettings() {
   const [settings, setSettings] = useState<SiteSettings>({
-    site_email: 'contact@jongleurmaersk.com',
-    site_phone: '+1 234 567 8900',
+    site_email: 'contact@maersk-cargo.com',
+    site_phone: '+1 639 526 1121',
     site_address: 'Logistics Hub',
-    support_email: 'support@jongleurmaersk.com',
+    support_email: 'support@maersk-cargo.com',
     company_name: 'Jongleur Maersk',
     company_description: '',
   });
@@ -34,10 +34,10 @@ export function useSiteSettings() {
           console.error('Error fetching site settings:', error);
         } else if (data) {
           setSettings({
-            site_email: data.site_email || 'contact@jongleur-maersk.com',
-            site_phone: data.site_phone || '+1 234 567 8900',
+            site_email: data.site_email || 'contact@maersk-cargo.com',
+            site_phone: data.site_phone || '+1 639 526 1121',
             site_address: data.site_address || 'Logistics Hub',
-            support_email: data.support_email || 'support@jongleur-maersk.com',
+            support_email: data.support_email || 'support@maersk-cargo.com',
             company_name: data.company_name || 'Jongleur Maersk',
             company_description: data.company_description || '',
           });
