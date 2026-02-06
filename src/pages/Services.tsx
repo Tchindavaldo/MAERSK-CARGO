@@ -3,11 +3,14 @@ import Header from '../components/Header';
 import Footer from '../components/Footer';
 import { Link } from 'react-router-dom';
 import SEO from '../components/SEO';
+import { getSiteName } from '../utils/siteConfig';
 
 export default function Services() {
+  const siteName = getSiteName();
+
   return (
     <div className="min-h-screen bg-gray-50 font-sans text-brand-dark">
-      <SEO title="Our Services - Jongleur Maersk" description="Explore our comprehensive logistics solutions including Sea Freight, Air Freight, and custom courier services." />
+      <SEO title={`Our Services - ${siteName}`} description="Explore our comprehensive logistics solutions including Sea Freight, Air Freight, and custom courier services." />
       <Header />
 
       {/* Hero Section */}

@@ -2,6 +2,8 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Lock, Mail } from 'lucide-react';
 import { supabase } from '../lib/supabase';
+import SEO from '../components/SEO';
+import { getSiteName } from '../utils/siteConfig';
 
 export default function Login() {
   const [email, setEmail] = useState('');
@@ -9,6 +11,7 @@ export default function Login() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const navigate = useNavigate();
+  const siteName = getSiteName();
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -34,13 +37,14 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-600 to-blue-800 flex items-center justify-center px-4">
+    <div className="min-h-screen bg-brand-primary flex items-center justify-center px-4">
+      <SEO title={`Login - ${siteName}`} description="Admin login for shipment management dashboard." />
       <div className="max-w-md w-full bg-white rounded-lg shadow-2xl p-8">
         <div className="text-center mb-8">
           <div className="inline-flex items-center justify-center w-16 h-16 bg-blue-100 rounded-full mb-4">
-            <Lock size={32} className="text-blue-600" />
+            <Lock size={32} className="text-brand-primary" />
           </div>
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">Jongleur Maersk Admin</h1>
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">{siteName} Admin</h1>
           <p className="text-gray-600">Access the shipment management dashboard</p>
         </div>
 

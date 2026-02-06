@@ -182,83 +182,84 @@ export default function Track() {
             </form>
 
             {shipment && (
-              <div className="bg-gray-50 rounded-lg overflow-hidden shadow-lg">
+              <div className="bg-gradient-to-br from-gray-50 to-brand-light/30 rounded-2xl overflow-hidden shadow-2xl">
                 {/* Visual Tracking Progress Bar */}
-                <div className="bg-white p-6 border-b-2 border-gray-200">
-                  <h3 className="text-xl font-bold mb-6 text-center">Package Tracking Progress</h3>
+                <div className="bg-white p-8 border-b border-gray-200">
+                  <h3 className="text-2xl font-bold mb-6 text-center text-brand-dark">Package Tracking Progress</h3>
                   <div className="max-w-4xl mx-auto">
                     {/* Progress Bar */}
                     <div className="relative mb-8">
-                      <div className="flex justify-between mb-2">
-                        <div className={`flex-1 text-center ${
-                          shipment.tracking_stage === 'picked_up' ? 'text-red-600 font-bold' : 'text-gray-500'
+                      <div className="flex justify-between mb-3">
+                        <div className={`flex-1 text-center transition-all ${
+                          shipment.tracking_stage === 'picked_up' ? 'text-brand-accent font-bold scale-110' : 'text-gray-400'
                         }`}>
-                          <div className="text-xs mb-1">📦</div>
-                          <div className="text-xs">Picked Up</div>
+                          <div className="text-2xl mb-2">📦</div>
+                          <div className="text-xs font-semibold">Picked Up</div>
                         </div>
-                        <div className={`flex-1 text-center ${
-                          shipment.tracking_stage === 'in_transit' ? 'text-red-600 font-bold' : 'text-gray-500'
+                        <div className={`flex-1 text-center transition-all ${
+                          shipment.tracking_stage === 'in_transit' ? 'text-brand-accent font-bold scale-110' : 'text-gray-400'
                         }`}>
-                          <div className="text-xs mb-1">🚚</div>
-                          <div className="text-xs">In Transit</div>
+                          <div className="text-2xl mb-2">🚚</div>
+                          <div className="text-xs font-semibold">In Transit</div>
                         </div>
-                        <div className={`flex-1 text-center ${
-                          shipment.tracking_stage === 'customs' ? 'text-red-600 font-bold' : 'text-gray-500'
+                        <div className={`flex-1 text-center transition-all ${
+                          shipment.tracking_stage === 'customs' ? 'text-brand-accent font-bold scale-110' : 'text-gray-400'
                         }`}>
-                          <div className="text-xs mb-1">🛃</div>
-                          <div className="text-xs">Customs</div>
+                          <div className="text-2xl mb-2">🛃</div>
+                          <div className="text-xs font-semibold">Customs</div>
                         </div>
-                        <div className={`flex-1 text-center ${
-                          shipment.tracking_stage === 'out_for_delivery' ? 'text-red-600 font-bold' : 'text-gray-500'
+                        <div className={`flex-1 text-center transition-all ${
+                          shipment.tracking_stage === 'out_for_delivery' ? 'text-brand-accent font-bold scale-110' : 'text-gray-400'
                         }`}>
-                          <div className="text-xs mb-1">🚛</div>
-                          <div className="text-xs">Out for Delivery</div>
+                          <div className="text-2xl mb-2">🚛</div>
+                          <div className="text-xs font-semibold">Out for Delivery</div>
                         </div>
-                        <div className={`flex-1 text-center ${
-                          shipment.tracking_stage === 'delivered' ? 'text-red-600 font-bold' : 'text-gray-500'
+                        <div className={`flex-1 text-center transition-all ${
+                          shipment.tracking_stage === 'delivered' ? 'text-brand-accent font-bold scale-110' : 'text-gray-400'
                         }`}>
-                          <div className="text-xs mb-1">✅</div>
-                          <div className="text-xs">Delivered</div>
+                          <div className="text-2xl mb-2">✅</div>
+                          <div className="text-xs font-semibold">Delivered</div>
                         </div>
                       </div>
                       
                       {/* Progress Bar Container */}
-                      <div className="relative h-2 bg-gray-200 rounded-full overflow-hidden">
+                      <div className="relative h-3 bg-gray-200 rounded-full overflow-hidden shadow-inner">
                         <div 
-                          className="absolute top-0 left-0 h-full bg-red-600 transition-all duration-500"
+                          className="absolute top-0 left-0 h-full bg-gradient-to-r from-brand-accent to-brand-secondary transition-all duration-700 ease-out"
                           style={{ width: `${shipment.tracking_progress || 0}%` }}
                         ></div>
                       </div>
-                      <div className="text-center mt-2 text-sm font-medium text-gray-700">
+                      <div className="text-center mt-3 text-sm font-bold text-brand-accent">
                         {shipment.tracking_progress || 0}% Complete
                       </div>
                     </div>
                   </div>
                 </div>
 
-                <div className="bg-white p-6 border-b-2 border-gray-200">
+                <div className="bg-white p-8 border-b border-gray-200">
                   <div className="tracking-info-detail">
-                    <div className="tracking-box bg-gray-50 p-4 rounded-lg border border-gray-200">
-                      <div className="tracking-time-box mb-3">
-                        <div className="tracking-time text-lg font-bold text-gray-800">
+                    <div className="tracking-box bg-gradient-to-br from-brand-light/50 to-gray-50 p-6 rounded-xl border-2 border-brand-accent/20 shadow-md">
+                      <div className="tracking-time-box mb-4">
+                        <div className="tracking-time text-xl font-bold text-brand-dark">
                           {shipment.status_date ? formatDate(shipment.status_date) : 'N/A'}
                         </div>
-                        <span className="text-sm text-gray-600">{shipment.status_time || 'N/A'}</span>
+                        <span className="text-sm text-gray-600 font-medium">{shipment.status_time || 'N/A'}</span>
                       </div>
-                      <div className="tracking-location style-7 flex items-start gap-3">
-                        <span className="dott w-3 h-3 bg-red-500 rounded-full mt-1 flex-shrink-0 animate-pulse"></span>
+                      <div className="tracking-location style-7 flex items-start gap-4">
+                        <span className="dott w-4 h-4 bg-brand-accent rounded-full mt-1 flex-shrink-0 animate-pulse shadow-lg"></span>
                         <div className="flex-1">
-                          <strong className="text-red-600 font-bold block mb-2">{shipment.status}</strong>
+                          <strong className="text-brand-accent font-bold block mb-3 text-lg">{shipment.status}</strong>
                           
                           {/* Display Insurances */}
                           {shipment.insurances && shipment.insurances.length > 0 && (
                             <div className="mb-3">
-                              <p className="text-sm font-semibold text-gray-700 mb-1">Insurances:</p>
+                              <p className="text-sm font-bold text-brand-dark mb-2">Insurances:</p>
                               {shipment.insurances.map((insurance, index) => (
-                                <div key={index} className="text-sm text-gray-700 ml-2 mb-1">
-                                  • {insurance.name}: {insurance.amount} 
-                                  <span className={`ml-2 px-2 py-0.5 rounded text-xs ${
-                                    insurance.paid ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'
+                                <div key={index} className="text-sm text-gray-700 ml-2 mb-2 flex items-center gap-2">
+                                  <span className="w-1.5 h-1.5 bg-brand-accent rounded-full"></span>
+                                  {insurance.name}: {insurance.amount} 
+                                  <span className={`ml-2 px-2.5 py-1 rounded-full text-xs font-bold ${
+                                    insurance.paid ? 'bg-green-100 text-green-700' : 'bg-amber-100 text-amber-700'
                                   }`}>
                                     {insurance.paid ? 'PAID' : 'NOT PAID'}
                                   </span>
@@ -269,10 +270,10 @@ export default function Track() {
                           
                           {/* Display Import Tax */}
                           {shipment.import_tax && (
-                            <div className="text-sm text-gray-700">
-                              <span className="font-semibold">Import Tax:</span> {shipment.import_tax}
-                              <span className={`ml-2 px-2 py-0.5 rounded text-xs ${
-                                shipment.import_tax_paid ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                            <div className="text-sm text-gray-700 flex items-center gap-2">
+                              <span className="font-bold text-brand-dark">Import Tax:</span> {shipment.import_tax}
+                              <span className={`ml-2 px-2.5 py-1 rounded-full text-xs font-bold ${
+                                shipment.import_tax_paid ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'
                               }`}>
                                 {shipment.import_tax_paid ? 'PAID' : 'NOT PAID'}
                               </span>
@@ -284,22 +285,22 @@ export default function Track() {
                   </div>
                 </div>
 
-                <div className="p-6">
-                  <div className="flex items-center justify-center mb-8">
-                    <div className="bg-white p-4 rounded-lg border-2 border-gray-200">
+                <div className="p-8">
+                  <div className="flex items-center justify-center mb-10">
+                    <div className="bg-white p-6 rounded-xl border-2 border-brand-accent/30 shadow-lg hover:shadow-xl transition-shadow">
                       {qrCodeUrl ? (
                         <div className="text-center">
                           <img
                             src={qrCodeUrl}
                             alt="QR Code"
-                            className="mx-auto mb-2"
+                            className="mx-auto mb-3"
                             style={{width: '120px', height: '120px'}}
                           />
-                          <p className="text-center text-xs font-bold">{shipment.tracking_number}</p>
+                          <p className="text-center text-xs font-bold text-brand-dark bg-brand-light/50 py-1.5 px-3 rounded-lg">{shipment.tracking_number}</p>
                         </div>
                       ) : (
                         <div className="flex flex-col items-center justify-center" style={{width: '120px', height: '120px'}}>
-                          <svg className="animate-spin h-8 w-8 text-red-600 mb-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                          <svg className="animate-spin h-8 w-8 text-brand-accent mb-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                             <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                             <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                           </svg>
@@ -309,176 +310,178 @@ export default function Track() {
                     </div>
                   </div>
 
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
-                    <div className="bg-white p-6 rounded-lg border border-gray-200">
-                      <h3 className="text-xl font-bold mb-4 flex items-center gap-2">
-                        <User size={24} className="text-red-600" />
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                    <div className="bg-white p-6 rounded-xl border-2 border-gray-200 hover:border-brand-accent/50 transition-all shadow-md hover:shadow-lg">
+                      <h3 className="text-xl font-bold mb-5 flex items-center gap-2 text-brand-dark">
+                        <User size={24} className="text-brand-accent" />
                         Shipper Information
                       </h3>
-                      <div className="space-y-3 text-sm">
+                      <div className="space-y-4 text-sm">
                         <div>
-                          <p className="text-gray-500">Name</p>
-                          <p className="font-medium">{shipment.shipper_name}</p>
+                          <p className="text-gray-500 font-semibold mb-1">Name</p>
+                          <p className="font-medium text-brand-dark">{shipment.shipper_name}</p>
                         </div>
                         <div>
-                          <p className="text-gray-500">Address</p>
-                          <p className="font-medium">{shipment.shipper_address}</p>
+                          <p className="text-gray-500 font-semibold mb-1">Address</p>
+                          <p className="font-medium text-brand-dark">{shipment.shipper_address}</p>
                         </div>
                         <div>
-                          <p className="text-gray-500">Phone Number</p>
-                          <p className="font-medium">{shipment.shipper_phone}</p>
+                          <p className="text-gray-500 font-semibold mb-1">Phone Number</p>
+                          <p className="font-medium text-brand-dark">{shipment.shipper_phone}</p>
                         </div>
                         <div>
-                          <p className="text-gray-500">Email</p>
-                          <p className="font-medium">{shipment.shipper_email}</p>
+                          <p className="text-gray-500 font-semibold mb-1">Email</p>
+                          <p className="font-medium text-brand-dark">{shipment.shipper_email}</p>
                         </div>
                       </div>
                     </div>
 
-                    <div className="bg-white p-6 rounded-lg border border-gray-200">
-                      <h3 className="text-xl font-bold mb-4 flex items-center gap-2">
-                        <User size={24} className="text-red-600" />
+                    <div className="bg-white p-6 rounded-xl border-2 border-gray-200 hover:border-brand-accent/50 transition-all shadow-md hover:shadow-lg">
+                      <h3 className="text-xl font-bold mb-5 flex items-center gap-2 text-brand-dark">
+                        <User size={24} className="text-brand-accent" />
                         Receiver Information
                       </h3>
-                      <div className="space-y-3 text-sm">
+                      <div className="space-y-4 text-sm">
                         <div>
-                          <p className="text-gray-500">Name</p>
-                          <p className="font-medium">{shipment.receiver_name}</p>
+                          <p className="text-gray-500 font-semibold mb-1">Name</p>
+                          <p className="font-medium text-brand-dark">{shipment.receiver_name}</p>
                         </div>
                         <div>
-                          <p className="text-gray-500">Address</p>
-                          <p className="font-medium">{shipment.receiver_address}</p>
+                          <p className="text-gray-500 font-semibold mb-1">Address</p>
+                          <p className="font-medium text-brand-dark">{shipment.receiver_address}</p>
                         </div>
                         <div>
-                          <p className="text-gray-500">Phone Number</p>
-                          <p className="font-medium">{shipment.receiver_phone}</p>
+                          <p className="text-gray-500 font-semibold mb-1">Phone Number</p>
+                          <p className="font-medium text-brand-dark">{shipment.receiver_phone}</p>
                         </div>
                         <div>
-                          <p className="text-gray-500">Email</p>
-                          <p className="font-medium">{shipment.receiver_email}</p>
+                          <p className="text-gray-500 font-semibold mb-1">Email</p>
+                          <p className="font-medium text-brand-dark">{shipment.receiver_email}</p>
                         </div>
                       </div>
                     </div>
                   </div>
 
-                  <div className="bg-white p-6 rounded-lg border border-gray-200 mb-8">
-                    <h3 className="text-xl font-bold mb-4">Shipment Information</h3>
+                  <div className="bg-white p-6 rounded-xl border-2 border-gray-200 shadow-md mb-8">
+                    <h3 className="text-xl font-bold mb-5 text-brand-dark border-b-2 border-brand-accent/20 pb-3">Shipment Information</h3>
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                       <div>
-                        <p className="text-gray-500 text-sm mb-1">Origin</p>
-                        <p className="font-medium">{shipment.origin}</p>
+                        <p className="text-gray-500 text-sm mb-1 font-semibold">Origin</p>
+                        <p className="font-medium text-brand-dark">{shipment.origin}</p>
                       </div>
                       <div>
-                        <p className="text-gray-500 text-sm mb-1">Package</p>
-                        <p className="font-medium">{shipment.product}</p>
+                        <p className="text-gray-500 text-sm mb-1 font-semibold">Package</p>
+                        <p className="font-medium text-brand-dark">{shipment.product}</p>
                       </div>
                       <div>
-                        <p className="text-gray-500 text-sm mb-1">Status</p>
-                        <p className="font-medium">{shipment.status}</p>
+                        <p className="text-gray-500 text-sm mb-1 font-semibold">Status</p>
+                        <p className="font-medium text-brand-accent">{shipment.status}</p>
                       </div>
                       <div>
-                        <p className="text-gray-500 text-sm mb-1">Destination</p>
-                        <p className="font-medium">{shipment.destination}</p>
+                        <p className="text-gray-500 text-sm mb-1 font-semibold">Destination</p>
+                        <p className="font-medium text-brand-dark">{shipment.destination}</p>
                       </div>
                       <div>
-                        <p className="text-gray-500 text-sm mb-1">Carrier</p>
-                        <p className="font-medium">{shipment.carrier}</p>
+                        <p className="text-gray-500 text-sm mb-1 font-semibold">Carrier</p>
+                        <p className="font-medium text-brand-dark">{shipment.carrier}</p>
                       </div>
                       <div>
-                        <p className="text-gray-500 text-sm mb-1">Type of Shipment</p>
-                        <p className="font-medium">{shipment.type_of_shipment}</p>
+                        <p className="text-gray-500 text-sm mb-1 font-semibold">Type of Shipment</p>
+                        <p className="font-medium text-brand-dark">{shipment.type_of_shipment}</p>
                       </div>
                       <div>
-                        <p className="text-gray-500 text-sm mb-1">Weight</p>
-                        <p className="font-medium">{shipment.weight}</p>
+                        <p className="text-gray-500 text-sm mb-1 font-semibold">Weight</p>
+                        <p className="font-medium text-brand-dark">{shipment.weight}</p>
                       </div>
                       <div>
-                        <p className="text-gray-500 text-sm mb-1">Shipment Mode</p>
-                        <p className="font-medium">{shipment.shipment_mode}</p>
+                        <p className="text-gray-500 text-sm mb-1 font-semibold">Shipment Mode</p>
+                        <p className="font-medium text-brand-dark">{shipment.shipment_mode}</p>
                       </div>
                       <div>
-                        <p className="text-gray-500 text-sm mb-1">Carrier Reference No.</p>
-                        <p className="font-medium">{shipment.carrier_reference}</p>
+                        <p className="text-gray-500 text-sm mb-1 font-semibold">Carrier Reference No.</p>
+                        <p className="font-medium text-brand-dark">{shipment.carrier_reference}</p>
                       </div>
                       <div>
-                        <p className="text-gray-500 text-sm mb-1">Product</p>
-                        <p className="font-medium">{shipment.product}</p>
+                        <p className="text-gray-500 text-sm mb-1 font-semibold">Product</p>
+                        <p className="font-medium text-brand-dark">{shipment.product}</p>
                       </div>
                       <div>
-                        <p className="text-gray-500 text-sm mb-1">Qty</p>
-                        <p className="font-medium">{shipment.quantity}</p>
+                        <p className="text-gray-500 text-sm mb-1 font-semibold">Qty</p>
+                        <p className="font-medium text-brand-dark">{shipment.quantity}</p>
                       </div>
                       <div>
-                        <p className="text-gray-500 text-sm mb-1">Payment Mode</p>
-                        <p className="font-medium">{shipment.payment_mode}</p>
+                        <p className="text-gray-500 text-sm mb-1 font-semibold">Payment Mode</p>
+                        <p className="font-medium text-brand-dark">{shipment.payment_mode}</p>
                       </div>
                       <div>
-                        <p className="text-gray-500 text-sm mb-1">Total Freight</p>
-                        <p className="font-medium">{shipment.total_freight}</p>
+                        <p className="text-gray-500 text-sm mb-1 font-semibold">Total Freight</p>
+                        <p className="font-medium text-brand-dark">{shipment.total_freight}</p>
                       </div>
                       <div>
-                        <p className="text-gray-500 text-sm mb-1">Expected Delivery Date</p>
-                        <p className="font-medium">{formatDate(shipment.expected_delivery_date)}</p>
+                        <p className="text-gray-500 text-sm mb-1 font-semibold">Expected Delivery Date</p>
+                        <p className="font-medium text-brand-dark">{formatDate(shipment.expected_delivery_date)}</p>
                       </div>
                       <div>
-                        <p className="text-gray-500 text-sm mb-1">Departure Date</p>
-                        <p className="font-medium">{formatDate(shipment.departure_date)}</p>
+                        <p className="text-gray-500 text-sm mb-1 font-semibold">Departure Date</p>
+                        <p className="font-medium text-brand-dark">{formatDate(shipment.departure_date)}</p>
                       </div>
                       <div>
-                        <p className="text-gray-500 text-sm mb-1">Departure Time</p>
-                        <p className="font-medium">{shipment.departure_time}</p>
+                        <p className="text-gray-500 text-sm mb-1 font-semibold">Departure Time</p>
+                        <p className="font-medium text-brand-dark">{shipment.departure_time}</p>
                       </div>
                       <div>
-                        <p className="text-gray-500 text-sm mb-1">Delivery Time</p>
-                        <p className="font-medium">{shipment.delivery_time}</p>
+                        <p className="text-gray-500 text-sm mb-1 font-semibold">Delivery Time</p>
+                        <p className="font-medium text-brand-dark">{shipment.delivery_time}</p>
                       </div>
                     </div>
                   </div>
 
                   {shipment.comment && (
-                    <div className="bg-yellow-50 border-l-4 border-yellow-400 p-6 mb-8">
-                      <p className="font-bold text-yellow-800 mb-2">Important Information</p>
-                      <p className="text-yellow-900">{shipment.comment}</p>
+                    <div className="bg-gradient-to-r from-amber-50 to-yellow-50 border-l-4 border-amber-400 p-6 mb-8 rounded-r-xl shadow-md">
+                      <p className="font-bold text-amber-800 mb-2 flex items-center gap-2">
+                        <span className="text-lg">⚠️</span> Important Information
+                      </p>
+                      <p className="text-amber-900">{shipment.comment}</p>
                     </div>
                   )}
 
                   {/* Image de l'envoi */}
                   {shipment.image_url && (
-                    <div className="bg-white p-6 rounded-lg border border-gray-200 mb-8">
-                      <h3 className="text-xl font-bold mb-4 flex items-center gap-2">
-                        <Package size={24} className="text-red-600" />
+                    <div className="bg-white p-6 rounded-xl border-2 border-gray-200 shadow-md mb-8">
+                      <h3 className="text-xl font-bold mb-4 flex items-center gap-2 text-brand-dark">
+                        <Package size={24} className="text-brand-accent" />
                         Shipment Image
                       </h3>
                       <img
                         src={shipment.image_url}
                         alt="Shipment"
-                        className="w-full max-w-2xl mx-auto rounded-lg shadow-md"
+                        className="w-full max-w-2xl mx-auto rounded-xl shadow-lg"
                       />
                     </div>
                   )}
 
                   {/* Google Map de la Chine */}
-                  <div className="bg-white p-6 rounded-lg border border-gray-200 mb-8">
-                    <h3 className="text-xl font-bold mb-4 flex items-center gap-2">
-                      <MapPin size={24} className="text-red-600" />
+                  <div className="bg-white p-6 rounded-xl border-2 border-gray-200 shadow-md mb-8">
+                    <h3 className="text-xl font-bold mb-5 flex items-center gap-2 text-brand-dark">
+                      <MapPin size={24} className="text-brand-accent" />
                       Location Map - China
                     </h3>
                     
-                    <div className="mb-4 bg-gray-50 p-3 rounded-lg">
+                    <div className="mb-4 bg-gradient-to-r from-brand-light/50 to-gray-50 p-4 rounded-xl border border-brand-accent/20">
                       <div className="flex items-center justify-between text-sm">
-                        <div className="flex items-center gap-2">
-                          <div className="w-3 h-3 bg-red-500 rounded-full animate-pulse"></div>
-                          <span className="font-medium">Origin: {shipment.origin}</span>
+                        <div className="flex items-center gap-3">
+                          <div className="w-3 h-3 bg-brand-accent rounded-full animate-pulse shadow-lg"></div>
+                          <span className="font-bold text-brand-dark">Origin: {shipment.origin}</span>
                         </div>
-                        <div className="text-gray-600">
-                          <MapPin size={16} className="inline mr-1" />
+                        <div className="text-gray-600 font-medium">
+                          <MapPin size={16} className="inline mr-1 text-brand-accent" />
                           China
                         </div>
                       </div>
                     </div>
                     
                     {/* Google Map intégrée */}
-                    <div className="rounded-lg overflow-hidden border-2 border-gray-200" style={{height: '400px'}}>
+                    <div className="rounded-xl overflow-hidden border-2 border-gray-200 shadow-lg" style={{height: '400px'}}>
                       <iframe
                         src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d29532.261909129487!2d114.15769!3d22.28552!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3404007368c8e47b%3A0xb9382c04fcfaa30e!2sHong%20Kong!5e0!3m2!1sfr!2sfr!4v1696234567890!5m2!1sfr!2sfr"
                         width="100%"
@@ -491,14 +494,14 @@ export default function Track() {
                       ></iframe>
                     </div>
                     
-                    <div className="mt-3 text-center text-sm text-gray-600">
-                      <p>📍 Shipment location: <strong>{shipment.origin}</strong></p>
+                    <div className="mt-4 text-center text-sm text-gray-600 font-medium">
+                      <p>📍 Shipment location: <strong className="text-brand-dark">{shipment.origin}</strong></p>
                     </div>
                   </div>
                 </div>
 
-                <div className="bg-red-600 text-white p-6 text-center">
-                  <button onClick={handlePrint} className="bg-white text-red-600 px-8 py-3 rounded-lg font-bold hover:bg-gray-100 transition">
+                <div className="bg-gradient-to-r from-brand-dark to-brand-secondary text-white p-6 text-center">
+                  <button onClick={handlePrint} className="bg-white text-brand-dark px-10 py-3.5 rounded-xl font-bold hover:bg-brand-light hover:scale-105 transition-all shadow-lg">
                     Print Details
                   </button>
                 </div>

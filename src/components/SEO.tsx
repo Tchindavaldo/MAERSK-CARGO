@@ -1,4 +1,5 @@
 import { useEffect } from 'react';
+import { getSiteName } from '../utils/siteConfig';
 
 interface SEOProps {
   title?: string;
@@ -9,12 +10,14 @@ interface SEOProps {
   noindex?: boolean;
 }
 
+const siteName = getSiteName();
+
 export default function SEO({
-  title = "Jongleur Maersk - Transport et Logistique International depuis la Chine",
-  description = "Jongleur Maersk, votre partenaire de confiance pour le transport maritime, aérien, routier et ferroviaire depuis la Chine. Solutions logistiques professionnelles avec suivi en temps réel.",
-  keywords = "transport chine, logistique internationale, fret maritime, fret aérien, transport routier, transport ferroviaire, expédition chine, cargo chine, livraison internationale, suivi colis",
+  title = `${siteName} - Global Logistics & Shipping Solutions`,
+  description = `${siteName}, your trusted partner for maritime, air, road and rail transport. Professional logistics solutions with real-time tracking.`,
+  keywords = "international logistics, sea freight, air freight, road transport, rail transport, cargo shipping, international delivery, package tracking",
   canonical,
-  ogImage = "https://jongleurmaersk.com/logo512x512.png",
+  ogImage = "/logo512x512.png",
   noindex = false
 }: SEOProps) {
   useEffect(() => {
@@ -94,13 +97,13 @@ export default function SEO({
       "url": canonical || window.location.href,
       "isPartOf": {
         "@type": "WebSite",
-        "name": "Jongleur Maersk",
-        "url": "https://jongleurmaersk.com"
+        "name": siteName,
+        "url": window.location.origin
       },
-      "inLanguage": "fr-FR",
+      "inLanguage": "en-US",
       "potentialAction": {
         "@type": "SearchAction",
-        "target": "https://jongleurmaersk.com/track?tracking={search_term_string}",
+        "target": `${window.location.origin}/track?tracking={search_term_string}`,
         "query-input": "required name=search_term_string"
       }
     };

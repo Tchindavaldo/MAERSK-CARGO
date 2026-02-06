@@ -559,15 +559,19 @@ export default function Admin() {
       <header className="bg-blue-600 text-white p-4 shadow-lg">
         <div className="container mx-auto flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <Package size={32} />
-            <h1 className="text-2xl font-bold">Shipment Admin Dashboard</h1>
+            <Package size={32} className="flex-shrink-0" />
+            {/* Desktop: Full title, Mobile: Just "Admin" */}
+            <h1 className="text-2xl font-bold hidden md:block">Shipment Admin Dashboard</h1>
+            <h1 className="text-2xl font-bold md:hidden">Admin</h1>
           </div>
+          {/* Desktop: Button with text, Mobile: Icon only */}
           <button
             onClick={handleLogout}
             className="flex items-center gap-2 bg-blue-700 hover:bg-blue-800 px-4 py-2 rounded-lg transition"
+            title="Logout"
           >
             <LogOut size={20} />
-            Logout
+            <span className="hidden md:inline">Logout</span>
           </button>
         </div>
       </header>
@@ -619,9 +623,10 @@ export default function Admin() {
                   setShowForm(true);
                 }}
                 className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-semibold transition"
+                title="Add New Shipment"
               >
                 <Plus size={20} />
-                Add New Shipment
+                <span className="hidden md:inline">Add New Shipment</span>
               </button>
             </div>
 

@@ -1,7 +1,7 @@
 {
-  "name": "ChineLogistique - Transport International",
-  "short_name": "ChineLogistique",
-  "description": "Solutions de transport et logistique internationale depuis la Chine",
+  "name": "MAERSKAIRCARGO - Global Logistics Solutions",
+  "short_name": "MAERSKAIRCARGO",
+  "description": "Global logistics and shipping solutions - Maritime, Air, Road and Rail transport",
   "icons": [
     {
       "src": "/logo32x32.png",
@@ -40,12 +40,16 @@
       "purpose": "any maskable"
     }
   ],
-  "theme_color": "#dc2626",
-  "background_color": "#ffffff",
+  "theme_color": "#42B0D5",
+  "background_color": "#0B132B",
   "display": "standalone",
   "start_url": "/",
   "scope": "/",
   "orientation": "portrait-primary",
-  "categories": ["logistics", "shipping", "transport"],
-  "lang": "fr"
+  "categories": [
+    "logistics",
+    "shipping",
+    "transport"
+  ],
+  "lang": "en"
 }

@@ -4,17 +4,19 @@ import Header from '../components/Header';
 import Footer from '../components/Footer';
 import { useSiteSettings } from '../hooks/useSiteSettings';
 import { Link } from 'react-router-dom';
+import { getSiteName } from '../utils/siteConfig';
 
 export default function Contact() {
   const { settings } = useSiteSettings();
+  const siteName = getSiteName();
 
   return (
     <div className="min-h-screen bg-white font-sans text-brand-dark">
       <SEO 
-        title="Contact - Jongleur Maersk | Global Logistics Partner"
-        description="Contact Jongleur Maersk for your international transport needs. Get a free quote for sea, air, and land freight solutions."
-        keywords="contact jongleur maersk, logistics quote, shipping contact, freight forwarder china"
-        canonical="https://jongleurmaersk.com/contact"
+        title={`Contact - ${siteName} | Global Logistics Partner`}
+        description={`Contact ${siteName} for your international transport needs. Get a free quote for sea, air, and land freight solutions.`}
+        keywords={`contact ${siteName}, logistics quote, shipping contact, freight forwarder china`}
+        canonical="https://www.maerskaircargo.com/contact"
       />
       <Header />
 
@@ -60,7 +62,7 @@ export default function Contact() {
             <h2 className="text-brand-accent font-bold tracking-widest uppercase mb-3 text-sm">Contact Us</h2>
             <h3 className="text-4xl font-bold text-brand-dark mb-6">We Value Your Feedback & Queries</h3>
             <p className="text-gray-600 text-lg leading-relaxed">
-              Jongleur Maersk is a global supplier of transport and logistics solutions.
+              {siteName} is a global supplier of transport and logistics solutions.
               Reach out to us for any inquiries or to request a quote for your shipping needs.
             </p>
           </div>
@@ -95,7 +97,7 @@ export default function Contact() {
                   </div>
                   <div>
                     <div className="font-bold text-lg mb-1 text-brand-dark">Email Address</div>
-                    <div className="text-gray-600">{settings.site_email || "contact@jongleurmaersk.com"}</div>
+                    <div className="text-gray-600">{settings.site_email || "contact@maerskaircargo.com"}</div>
                   </div>
                 </div>
 

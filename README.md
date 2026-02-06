@@ -1,6 +1,6 @@
-# 🚢 ChineLogistique - Plateforme de Transport et Logistique Internationale
+# 🚢 MAERSKAIRCARGO - Plateforme de Transport et Logistique Internationale
 
-![Version](https://img.shields.io/badge/version-0.0.0-blue)
+![Version](https://img.shields.io/badge/version-1.0.0-blue)
 ![License](https://img.shields.io/badge/license-MIT-green)
 ![Node](https://img.shields.io/badge/node-%3E%3D18-brightgreen)
 ![React](https://img.shields.io/badge/React-18.3.1-61DAFB?logo=react)
@@ -28,12 +28,12 @@
 
 ## 🎯 Vue d'ensemble
 
-**ChineLogistique** est une plateforme web moderne de transport et logistique internationale spécialisée dans les expéditions depuis la Chine vers le monde entier (Afrique, Europe, Amérique du Nord, etc.).
+**MAERSKAIRCARGO** est une plateforme web moderne de transport et logistique internationale offrant des solutions complètes pour les expéditions maritimes, aériennes, routières et ferroviaires à travers le monde.
 
 ### Objectifs principaux
 
 - 📦 Offrir des solutions de transport multimodales (maritime, aérien, routier, ferroviaire)
-- 🌍 Servir les marchés francophones (Cameroun, Côte d'Ivoire, Sénégal, RDC, Maroc, Belgique, Suisse, Canada, France)
+- 🌍 Servir les marchés internationaux avec excellence
 - 🔍 Permettre le suivi en temps réel des expéditions
 - 💼 Fournir un espace d'administration pour gérer les commandes
 - 📱 Garantir une expérience utilisateur optimale sur tous les appareils
@@ -44,7 +44,7 @@
 ## ✨ Caractéristiques principales
 
 ### Pour les utilisateurs
-- **Suivi de colis** : Système de suivi en temps réel avec numéro de commande
+- **Suivi de colis** : Système de suivi en temps réel avec numéro de tracking
 - **Devis en ligne** : Calcul automatique des tarifs selon le type de transport
 - **Blog informatif** : Articles sur la logistique et les services
 - **Réseau de partenaires** : Affichage des partenaires et points de service
@@ -52,7 +52,7 @@
 - **Design responsive** : Adaptation parfaite à tous les écrans
 
 ### Pour les administrateurs
-- **Tableau de bord complet** : Gestion centralisée des commandes
+- **Tableau de bord complet** : Gestion centralisée des expéditions
 - **Gestion des paramètres** : Configuration des tarifs et des services
 - **Authentification sécurisée** : Système de login avec Supabase
 - **Gestion des utilisateurs** : Création et modification des comptes
@@ -506,10 +506,9 @@ npm run preview          # Prévisualiser la build
 
 ## 📞 Support et contact
 
-- **Email** : info@chinelogistique.com
-- **Téléphone** : +85252089745
-- **Adresse** : International Trade Center, Guangzhou, Guangdong, CN
-- **Réseaux sociaux** : Facebook, Twitter, LinkedIn
+- **Email** : contact@maerskaircargo.com
+- **Support** : support@maerskaircargo.com
+- **Website** : https://maerskaircargo.com
 
 ---
 
@@ -519,7 +518,7 @@ Ce projet est sous licence MIT. Voir le fichier LICENSE pour plus de détails.
 
 ---
 
-## 👨‍💻 Contribution
+## 👨💻 Contribution
 
 Les contributions sont les bienvenues ! Veuillez :
 
@@ -533,7 +532,7 @@ Les contributions sont les bienvenues ! Veuillez :
 
 ## 📝 Changelog
 
-### Version 0.0.0 (Initial)
+### Version 1.0.0 (Current)
 - ✅ Configuration initiale du projet
 - ✅ Setup React + TypeScript + Vite
 - ✅ Intégration TailwindCSS
@@ -543,7 +542,9 @@ Les contributions sont les bienvenues ! Veuillez :
 - ✅ Optimisations SEO
 - ✅ Configuration Vercel
 - ✅ Headers de sécurité
+- ✅ Système de tracking en temps réel
+- ✅ Dashboard administrateur complet
 
 ---
 
-**Créé avec ❤️ par l'équipe ChineLogistique**
+**Créé avec ❤️ par l'équipe MAERSKAIRCARGO**

@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import {
-  Ship,
   Phone,
   Mail,
   Menu,
@@ -14,12 +13,14 @@ import {
   ChevronRight
 } from 'lucide-react';
 import { useSiteSettings } from '../hooks/useSiteSettings';
+import { getSiteName } from '../utils/siteConfig';
 
 export default function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const location = useLocation();
   const { settings } = useSiteSettings();
+  const siteName = getSiteName();
 
   const isActive = (path: string) => location.pathname === path;
 
@@ -31,15 +32,20 @@ export default function Header() {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
+  // Fermer le menu mobile lors du changement de route
+  useEffect(() => {
+    setMobileMenuOpen(false);
+  }, [location.pathname]);
+
   return (
-    <div className="flex flex-col w-full z-50 transition-all duration-300">
+    <>
       {/* Top Bar - Dark Navy */}
       <div className="bg-brand-dark text-gray-300 py-2 text-sm border-b border-white/10 hidden md:block">
         <div className="container mx-auto px-4 flex justify-between items-center">
           <div className="flex items-center gap-6">
-            <a href={`mailto:${settings.site_email || 'contact@jongleurmaersk.com'}`} className="flex items-center gap-2 hover:text-brand-accent transition cursor-pointer">
+            <a href={`mailto:${settings.site_email || 'contact@maerskaircargo.com'}`} className="flex items-center gap-2 hover:text-brand-accent transition cursor-pointer">
               <Mail size={14} className="text-brand-accent" />
-              {settings.site_email || 'contact@jongleurmaersk.com'}
+              {settings.site_email || 'contact@maerskaircargo.com'}
             </a>
             <a href={`tel:${settings.site_phone || '+1 234 567 8900'}`} className="flex items-center gap-2 hover:text-brand-accent transition cursor-pointer">
               <Phone size={14} className="text-brand-accent" />
@@ -60,22 +66,25 @@ export default function Header() {
         </div>
       </div>
 
-      {/* Main Navbar */}
+      {/* Main Navbar - Sticky */}
       <header 
-        className={`w-full transition-all duration-300 ${
+        className={`w-full transition-all duration-300 sticky top-0 z-50 ${
           scrolled ? 'bg-white shadow-lg py-2' : 'bg-white shadow-sm py-4'
-        } sticky top-0`}
+        }`}
       >
         <div className="container mx-auto px-4 flex items-center justify-between">
           {/* Logo */}
           <Link to="/" className="flex items-center gap-3 group">
-            <div className={`p-2 rounded-lg transition-colors duration-300 ${scrolled ? 'bg-brand-accent text-white' : 'bg-brand-dark text-white'}`}>
-               <Ship size={32} />
+            <div className={`transition-all duration-300 ${scrolled ? 'h-12' : 'h-14'}`}>
+               <img 
+                 src="/logo.png" 
+                 alt={siteName} 
+                 className="h-full w-auto object-contain"
+               />
             </div>
             <div className="flex flex-col">
               <span className="text-2xl font-black tracking-tight text-brand-dark leading-none">
-                JONGLEUR
-                <span className="text-brand-accent">MAERSK</span>
+                {siteName}
               </span>
               <span className="text-[10px] font-bold tracking-widest text-gray-400 uppercase">
                 Global Logistics
@@ -104,7 +113,7 @@ export default function Header() {
             })}
           </nav>
 
-          {/* Right Action */}
+          {/* Desktop CTA */}
           <div className="hidden lg:flex items-center gap-4">
             <button className="p-2 text-gray-500 hover:text-brand-accent transition">
               <Search size={20} />
@@ -121,6 +130,7 @@ export default function Header() {
           <button 
             className="lg:hidden text-brand-dark p-2"
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            aria-label="Toggle menu"
           >
             {mobileMenuOpen ? <X size={28} /> : <Menu size={28} />}
           </button>
@@ -131,21 +141,21 @@ export default function Header() {
       {mobileMenuOpen && (
         <div className="fixed inset-0 z-40 bg-brand-dark pt-24 px-6 lg:hidden animate-slide-in">
           <nav className="flex flex-col gap-6 text-xl font-medium text-white">
-            <Link to="/" onClick={() => setMobileMenuOpen(false)} className="border-b border-gray-700 pb-2">Home</Link>
-            <Link to="/about" onClick={() => setMobileMenuOpen(false)} className="border-b border-gray-700 pb-2">About</Link>
-            <Link to="/services" onClick={() => setMobileMenuOpen(false)} className="border-b border-gray-700 pb-2">Services</Link>
-            <Link to="/network" onClick={() => setMobileMenuOpen(false)} className="border-b border-gray-700 pb-2">Network</Link>
-            <Link to="/contact" onClick={() => setMobileMenuOpen(false)} className="border-b border-gray-700 pb-2">Contact</Link>
+            <Link to="/" onClick={() => setMobileMenuOpen(false)} className="border-b border-gray-700 pb-2 hover:text-brand-accent transition">Home</Link>
+            <Link to="/about" onClick={() => setMobileMenuOpen(false)} className="border-b border-gray-700 pb-2 hover:text-brand-accent transition">About</Link>
+            <Link to="/services" onClick={() => setMobileMenuOpen(false)} className="border-b border-gray-700 pb-2 hover:text-brand-accent transition">Services</Link>
+            <Link to="/network" onClick={() => setMobileMenuOpen(false)} className="border-b border-gray-700 pb-2 hover:text-brand-accent transition">Network</Link>
+            <Link to="/contact" onClick={() => setMobileMenuOpen(false)} className="border-b border-gray-700 pb-2 hover:text-brand-accent transition">Contact</Link>
             <Link 
               to="/track" 
               onClick={() => setMobileMenuOpen(false)}
-              className="mt-4 bg-brand-accent text-white py-4 rounded-lg text-center font-bold shadow-lg"
+              className="mt-4 bg-brand-accent text-white py-4 rounded-lg text-center font-bold shadow-lg hover:bg-brand-secondary transition"
             >
               Track & Trace
             </Link>
           </nav>
         </div>
       )}
-    </div>
+    </>
   );
 }

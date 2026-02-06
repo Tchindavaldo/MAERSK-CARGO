@@ -17,10 +17,12 @@ import Header from '../components/Header';
 import Footer from '../components/Footer';
 import CounterAnimation from '../components/CounterAnimation';
 import SEO from '../components/SEO';
+import { getSiteName } from '../utils/siteConfig';
 
 export default function Home() {
   const [trackingNumber, setTrackingNumber] = useState('');
   const navigate = useNavigate();
+  const siteName = getSiteName();
 
   const handleTrack = (e: FormEvent) => {
     e.preventDefault();
@@ -32,13 +34,14 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-brand-light font-sans text-brand-primary">
       <SEO 
-        title="Jongleur Maersk - Global Logistics & Shipping Solutions"
+        title={`${siteName} - Global Logistics & Shipping Solutions`}
         description="Premium international logistics services. Ocean, Air, and Road freight solutions connecting China to the world."
         keywords="global shipping, logistics, freight forwarder, maersk, china shipping, tracking"
-        canonical="https://jongleurmaersk.com"
+        canonical="https://www.maerskaircargo.com"
       />
       <OrganizationSchema />
       <Header />
+
 
       {/* Hero Section */}
       <section className="relative bg-brand-dark overflow-hidden min-h-[85vh] flex items-center">
@@ -68,7 +71,7 @@ export default function Home() {
               </span>
             </h1>
             <p className="text-xl text-gray-300 mb-10 max-w-xl leading-relaxed">
-              Jongleur Maersk delivers world-class logistics solutions. From Shanghai to the world, we ensure your cargo arrives safely and on time.
+              {siteName} delivers world-class logistics solutions. From Shanghai to the world, we ensure your cargo arrives safely and on time.
             </p>
             
             <div className="bg-white/10 backdrop-blur-md p-2 rounded-xl border border-white/20 max-w-lg shadow-2xl">
@@ -211,7 +214,7 @@ export default function Home() {
             </div>
             
             <div className="lg:w-1/2">
-              <h2 className="text-brand-accent font-bold tracking-widest uppercase mb-3 text-sm">Why Choose Jongleur Maersk</h2>
+              <h2 className="text-brand-accent font-bold tracking-widest uppercase mb-3 text-sm">Why Choose {siteName}</h2>
               <h3 className="text-4xl font-bold text-brand-dark mb-8">We Go Beyond Logistics</h3>
               
               <div className="space-y-8">
@@ -324,7 +327,7 @@ export default function Home() {
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {[
-              { name: "Sarah Jenkins", role: "Import Director", text: "Jongleur Maersk transformed our supply chain. The visibility and reliability are unmatched." },
+              { name: "Sarah Jenkins", role: "Import Director", text: `${siteName} transformed our supply chain. The visibility and reliability are unmatched.` },
               { name: "Michael Chen", role: "Factory Owner", text: "Shipping to Africa used to be a headache. Now it's the easiest part of my business." },
               { name: "Robert Fox", role: "Logistics Manager", text: "Their customer support is incredible. Always available and proactive with updates." }
             ].map((t, i) => (
@@ -351,7 +354,7 @@ export default function Home() {
          <div className="absolute inset-0 opacity-10 bg-[url('https://www.transparenttextures.com/patterns/world-map.png')]"></div>
          <div className="container mx-auto px-4 relative z-10">
            <h2 className="text-4xl text-white font-bold mb-6">Ready to Ship with Confidence?</h2>
-           <p className="text-blue-200 text-xl mb-10 max-w-2xl mx-auto">Join thousands of businesses who trust Jongleur Maersk for their logistics needs.</p>
+           <p className="text-blue-200 text-xl mb-10 max-w-2xl mx-auto">Join thousands of businesses who trust {siteName} for their logistics needs.</p>
            <button className="bg-brand-accent hover:bg-white hover:text-brand-dark text-white px-10 py-4 rounded-full font-bold text-lg transition-all duration-300 shadow-2xl transform hover:-translate-y-1">
              Get a Free Quote Today
            </button>
