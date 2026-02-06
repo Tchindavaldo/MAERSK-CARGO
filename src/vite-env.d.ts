@@ -6,6 +6,7 @@ interface ImportMetaEnv {
     readonly VITE_SITE_NAME: string
     readonly VITE_SITE_EMAIL: string
     readonly VITE_SUPPORT_EMAIL: string
+    readonly VITE_ALLOWED_EMAILS: string
 }
 
 interface ImportMeta {

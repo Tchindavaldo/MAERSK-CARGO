@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Lock, Mail } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import SEO from '../components/SEO';
-import { getSiteName } from '../utils/siteConfig';
+import { getSiteName, getAllowedEmails } from '../utils/siteConfig';
 
 export default function Login() {
   const [email, setEmail] = useState('');
@@ -27,6 +27,13 @@ export default function Login() {
       if (loginError) throw loginError;
 
       if (data.user) {
+        // Security check: Verify if email is allowed
+        const allowedEmails = getAllowedEmails();
+        if (allowedEmails.length > 0 && data.user.email && !allowedEmails.includes(data.user.email)) {
+             await supabase.auth.signOut();
+             throw new Error('Access Denied: Your account is not authorized for this site.');
+        }
+
         navigate('/admin');
       }
     } catch (err: any) {

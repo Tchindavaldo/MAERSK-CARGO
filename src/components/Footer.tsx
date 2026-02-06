@@ -1,9 +1,11 @@
 import { Link } from 'react-router-dom';
-import { Ship, Facebook, Twitter, Instagram, Linkedin, Mail, Phone, MapPin } from 'lucide-react';
+import { Facebook, Twitter, Instagram, Linkedin, Mail, Phone, MapPin } from 'lucide-react';
 import { useSiteSettings } from '../hooks/useSiteSettings';
+import { getSiteName } from '../utils/siteConfig';
 
 export default function Footer() {
   const { settings } = useSiteSettings();
+  const siteName = getSiteName();
 
   return (
     <footer className="bg-brand-dark text-white pt-20 pb-10 border-t border-white/5">
@@ -12,15 +14,18 @@ export default function Footer() {
           
           {/* Brand Column */}
           <div className="space-y-6">
-            <div className="flex items-center gap-3">
-              <div className="p-2 bg-brand-accent rounded-lg text-white">
-                <Ship size={24} />
+            <Link to="/" className="flex items-center gap-3">
+              <div className="h-12 w-auto">
+                 <img 
+                   src="/logo.png" 
+                   alt={siteName} 
+                   className="h-full w-auto object-contain brightness-0 invert"
+                 />
               </div>
-              <span className="text-2xl font-black tracking-tight leading-none">
-                JONGLEUR
-                <span className="text-brand-accent">MAERSK</span>
+              <span className="text-xl font-black tracking-tight leading-none text-white">
+                {siteName}
               </span>
-            </div>
+            </Link>
             <p className="text-gray-400 leading-relaxed text-sm">
               We provide global logistics solutions that drive your business forward. Reliable, efficient, and secure shipping from China to the world.
             </p>
@@ -71,7 +76,7 @@ export default function Footer() {
               </li>
               <li className="flex items-center gap-3">
                 <Mail className="text-brand-accent flex-shrink-0" size={18} />
-                <span>{settings.site_email || 'info@jongleurmaersk.com'}</span>
+                <span>{settings.site_email || 'contact@maerskaircargo.com'}</span>
               </li>
             </ul>
           </div>
@@ -80,7 +85,7 @@ export default function Footer() {
 
         {/* Bottom Bar */}
         <div className="border-t border-white/10 pt-8 flex flex-col md:flex-row justify-between items-center text-xs text-gray-500 gap-4">
-          <p>&copy; {new Date().getFullYear()} Jongleur Maersk. All rights reserved.</p>
+          <p>&copy; {new Date().getFullYear()} {siteName}. All rights reserved.</p>
           <div className="flex gap-6">
             <Link to="/privacy" className="hover:text-white transition">Privacy Policy</Link>
             <Link to="/terms" className="hover:text-white transition">Terms of Service</Link>
