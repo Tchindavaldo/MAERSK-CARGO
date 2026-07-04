@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Plus, Edit, Trash2, LogOut, Package, Upload, X, Settings, MessageCircle } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import Toast from '../components/Toast';
+import { COUNTRIES } from '../lib/countries';
 
 interface Shipment {
   id: string;
@@ -68,6 +69,10 @@ interface ShipmentForm {
   status_time: string;
   tracking_progress: number;
   tracking_stage: string;
+  total_duration_days: number;
+  origin_country: string;
+  destination_country: string;
+  transport_mode: string;
 }
 
 export default function Admin() {
@@ -132,8 +137,62 @@ export default function Admin() {
     status_time: '',
     tracking_progress: 0,
     tracking_stage: 'picked_up',
+    total_duration_days: 0,
+    origin_country: '',
+    destination_country: '',
+    transport_mode: 'sea',
   });
   const navigate = useNavigate();
+
+  const computeStageFromProgress = (progressPct: number): string => {
+    if (progressPct >= 100) return 'delivered';
+    if (progressPct >= 85) return 'out_for_delivery';
+    if (progressPct >= 70) return 'customs';
+    if (progressPct >= 15) return 'in_transit';
+    return 'picked_up';
+  };
+
+  const addDaysISO = (isoDate: string, days: number): string => {
+    if (!isoDate || !days) return '';
+    const d = new Date(isoDate);
+    if (isNaN(d.getTime())) return '';
+    d.setDate(d.getDate() + days);
+    return d.toISOString().slice(0, 10);
+  };
+
+  const isValidISODate = (s: string): boolean => {
+    if (!s) return false;
+    const d = new Date(s);
+    return !isNaN(d.getTime());
+  };
+
+  // Progression automatique : durée totale + date de départ => date de livraison
+  // estimée, % de progression et étape calculés chaque jour
+  useEffect(() => {
+    if (formData.total_duration_days > 0 && formData.departure_date) {
+      const expected = addDaysISO(formData.departure_date, formData.total_duration_days);
+      const dep = new Date(formData.departure_date);
+      const startUTC = Date.UTC(dep.getFullYear(), dep.getMonth(), dep.getDate());
+      const today = new Date();
+      const todayUTC = Date.UTC(today.getFullYear(), today.getMonth(), today.getDate());
+      const diffDays = Math.floor((todayUTC - startUTC) / 86400000);
+      const elapsed = Math.max(0, Math.min(formData.total_duration_days, diffDays));
+      const autoProgress = Math.round((elapsed / formData.total_duration_days) * 100);
+      const autoStage = computeStageFromProgress(autoProgress);
+      if (
+        formData.expected_delivery_date !== expected ||
+        formData.tracking_progress !== autoProgress ||
+        formData.tracking_stage !== autoStage
+      ) {
+        setFormData((prev) => ({
+          ...prev,
+          expected_delivery_date: expected,
+          tracking_progress: autoProgress,
+          tracking_stage: autoStage,
+        }));
+      }
+    }
+  }, [formData.departure_date, formData.total_duration_days, formData.expected_delivery_date, formData.tracking_progress, formData.tracking_stage]);
 
   useEffect(() => {
     const initializeAdmin = async () => {
@@ -308,6 +367,8 @@ export default function Admin() {
     // Validation des champs requis
     if (!formData.origin.trim()) errors.origin = 'L\'origine est requise';
     if (!formData.destination.trim()) errors.destination = 'La destination est requise';
+    if (!formData.origin_country) errors.origin_country = 'Pays d\'origine requis';
+    if (!formData.destination_country) errors.destination_country = 'Pays de destination requis';
     if (!formData.carrier.trim()) errors.carrier = 'Le transporteur est requis';
     if (!formData.shipper_name.trim()) {
       errors.shipper_name = 'Le nom de l\'expéditeur est requis';
@@ -349,6 +410,35 @@ export default function Admin() {
       errors.quantity = 'La quantité doit être positive';
     }
 
+    // Validation des dates/heures (Postgres refuse "" pour les types date/time)
+    if (!formData.departure_date) {
+      errors.departure_date = 'La date de départ est requise';
+    } else if (!isValidISODate(formData.departure_date)) {
+      errors.departure_date = 'Format de date de départ invalide';
+    }
+    if (formData.total_duration_days === 0 && !formData.expected_delivery_date) {
+      errors.expected_delivery_date = 'La date de livraison estimée est requise';
+    }
+    if (!formData.status_date) {
+      errors.status_date = 'La date du statut est requise';
+    }
+    if (!formData.status_time) {
+      errors.status_time = 'L\'heure du statut est requise';
+    }
+
+    // Si une durée totale est définie, valider selon le mode de transport
+    if (formData.total_duration_days > 0) {
+      // Validation selon le mode de transport
+      if (formData.transport_mode === 'air' && formData.total_duration_days > 7) {
+        errors.total_duration_days =
+          '✈️ Mode aérien : la durée ne peut pas dépasser 7 jours (l\'avion est rapide)';
+      }
+      if (formData.transport_mode === 'sea' && formData.total_duration_days < 30) {
+        errors.total_duration_days =
+          '🚢 Mode maritime : la durée doit être d\'au moins 30 jours (le bateau est lent)';
+      }
+    }
+
     setFormErrors(errors);
     return Object.keys(errors).length === 0;
   };
@@ -374,7 +464,7 @@ export default function Admin() {
           .eq('id', editingId);
 
         if (error) throw error;
-        
+
         setToast({ message: 'Shipment updated successfully!', type: 'success' });
       } else {
         // Générer un code de tracking si non fourni
@@ -428,10 +518,10 @@ export default function Admin() {
         payment_mode: data.payment_mode,
         shipment_mode: data.shipment_mode,
         total_freight: data.total_freight,
-        expected_delivery_date: data.expected_delivery_date,
-        departure_date: data.departure_date,
-        departure_time: data.departure_time,
-        delivery_time: data.delivery_time,
+        expected_delivery_date: data.expected_delivery_date || '',
+        departure_date: data.departure_date || '',
+        departure_time: data.departure_time || '',
+        delivery_time: data.delivery_time || '',
         package_description: data.package_description,
         shipper_name: data.shipper_name,
         shipper_phone: data.shipper_phone,
@@ -450,6 +540,10 @@ export default function Admin() {
         status_time: data.status_time || '',
         tracking_progress: data.tracking_progress || 0,
         tracking_stage: data.tracking_stage || 'picked_up',
+        total_duration_days: data.total_duration_days || 0,
+        origin_country: data.origin_country || '',
+        destination_country: data.destination_country || '',
+        transport_mode: data.transport_mode || 'sea',
       });
       setImagePreview(data.image_url || null);
       setEditingId(id);
@@ -549,6 +643,10 @@ export default function Admin() {
       status_time: '',
       tracking_progress: 0,
       tracking_stage: 'picked_up',
+      total_duration_days: 0,
+      origin_country: '',
+      destination_country: '',
+      transport_mode: 'sea',
     });
     setImagePreview(null);
     setFormErrors({});
@@ -780,6 +878,31 @@ export default function Admin() {
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Origin Country * 🌍
+                  </label>
+                  <select
+                    value={formData.origin_country}
+                    onChange={(e) => setFormData({ ...formData, origin_country: e.target.value })}
+                    className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 ${
+                      formErrors.origin_country
+                        ? 'border-red-500 focus:ring-red-600'
+                        : 'border-gray-300 focus:ring-blue-600'
+                    }`}
+                  >
+                    <option value="">-- Sélectionner pays d'origine --</option>
+                    {COUNTRIES.map((c) => (
+                      <option key={c.code} value={c.code}>
+                        {c.name} ({c.code})
+                      </option>
+                    ))}
+                  </select>
+                  {formErrors.origin_country && (
+                    <p className="text-red-500 text-sm mt-1">{formErrors.origin_country}</p>
+                  )}
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
                     Destination *
                   </label>
                   <input
@@ -795,6 +918,45 @@ export default function Admin() {
                   {formErrors.destination && (
                     <p className="text-red-500 text-sm mt-1">{formErrors.destination}</p>
                   )}
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Destination Country * 🌍
+                  </label>
+                  <select
+                    value={formData.destination_country}
+                    onChange={(e) => setFormData({ ...formData, destination_country: e.target.value })}
+                    className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 ${
+                      formErrors.destination_country
+                        ? 'border-red-500 focus:ring-red-600'
+                        : 'border-gray-300 focus:ring-blue-600'
+                    }`}
+                  >
+                    <option value="">-- Sélectionner pays de destination --</option>
+                    {COUNTRIES.map((c) => (
+                      <option key={c.code} value={c.code}>
+                        {c.name} ({c.code})
+                      </option>
+                    ))}
+                  </select>
+                  {formErrors.destination_country && (
+                    <p className="text-red-500 text-sm mt-1">{formErrors.destination_country}</p>
+                  )}
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Mode de Transport * 🚢✈️
+                  </label>
+                  <select
+                    value={formData.transport_mode}
+                    onChange={(e) => setFormData({ ...formData, transport_mode: e.target.value })}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600"
+                  >
+                    <option value="sea">🚢 Maritime (Bateau)</option>
+                    <option value="air">✈️ Aérien (Avion)</option>
+                  </select>
                 </div>
 
                 <div>
@@ -914,26 +1076,46 @@ export default function Admin() {
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Expected Delivery Date
+                    Expected Delivery Date {formData.total_duration_days === 0 && <span className="text-red-500">*</span>}
                   </label>
                   <input
                     type="date"
                     value={formData.expected_delivery_date}
                     onChange={(e) => setFormData({ ...formData, expected_delivery_date: e.target.value })}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600"
+                    disabled={formData.total_duration_days > 0}
+                    className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 disabled:bg-gray-100 disabled:text-gray-500 disabled:cursor-not-allowed ${
+                      formErrors.expected_delivery_date
+                        ? 'border-red-500 focus:ring-red-600'
+                        : 'border-gray-300 focus:ring-blue-600'
+                    }`}
                   />
+                  {formErrors.expected_delivery_date && (
+                    <p className="text-red-500 text-sm mt-1">{formErrors.expected_delivery_date}</p>
+                  )}
+                  {formData.total_duration_days > 0 && (
+                    <p className="text-xs text-gray-500 mt-1">
+                      Calculée automatiquement (Date de départ + durée totale).
+                    </p>
+                  )}
                 </div>
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Departure Date
+                    Departure Date {formData.total_duration_days > 0 && <span className="text-red-500">*</span>}
                   </label>
                   <input
                     type="date"
                     value={formData.departure_date}
                     onChange={(e) => setFormData({ ...formData, departure_date: e.target.value })}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600"
+                    className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 ${
+                      formErrors.departure_date
+                        ? 'border-red-500 focus:ring-red-600'
+                        : 'border-gray-300 focus:ring-blue-600'
+                    }`}
                   />
+                  {formErrors.departure_date && (
+                    <p className="text-red-500 text-sm mt-1">{formErrors.departure_date}</p>
+                  )}
                 </div>
 
                 <div>
@@ -1143,25 +1325,39 @@ export default function Admin() {
                   <div className="grid grid-cols-2 gap-6">
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Status Date
+                        Status Date <span className="text-red-500">*</span>
                       </label>
                       <input
                         type="date"
                         value={formData.status_date}
                         onChange={(e) => setFormData({ ...formData, status_date: e.target.value })}
-                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600"
+                        className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 ${
+                          formErrors.status_date
+                            ? 'border-red-500 focus:ring-red-600'
+                            : 'border-gray-300 focus:ring-blue-600'
+                        }`}
                       />
+                      {formErrors.status_date && (
+                        <p className="text-red-500 text-sm mt-1">{formErrors.status_date}</p>
+                      )}
                     </div>
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Status Time
+                        Status Time <span className="text-red-500">*</span>
                       </label>
                       <input
                         type="time"
                         value={formData.status_time}
                         onChange={(e) => setFormData({ ...formData, status_time: e.target.value })}
-                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600"
+                        className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 ${
+                          formErrors.status_time
+                            ? 'border-red-500 focus:ring-red-600'
+                            : 'border-gray-300 focus:ring-blue-600'
+                        }`}
                       />
+                      {formErrors.status_time && (
+                        <p className="text-red-500 text-sm mt-1">{formErrors.status_time}</p>
+                      )}
                     </div>
                   </div>
 
@@ -1173,7 +1369,8 @@ export default function Admin() {
                     <select
                       value={formData.tracking_stage}
                       onChange={(e) => setFormData({ ...formData, tracking_stage: e.target.value })}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600"
+                      disabled={formData.total_duration_days > 0}
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600 disabled:bg-gray-100 disabled:text-gray-500 disabled:cursor-not-allowed"
                     >
                       <option value="picked_up">Picked Up</option>
                       <option value="in_transit">In Transit</option>
@@ -1181,6 +1378,11 @@ export default function Admin() {
                       <option value="out_for_delivery">Out for Delivery</option>
                       <option value="delivered">Delivered</option>
                     </select>
+                    {formData.total_duration_days > 0 && (
+                      <p className="text-xs text-gray-500 mt-1">
+                        Calculé automatiquement selon la progression journalière.
+                      </p>
+                    )}
                   </div>
 
                   <div>
@@ -1193,8 +1395,52 @@ export default function Admin() {
                       max="100"
                       value={formData.tracking_progress}
                       onChange={(e) => setFormData({ ...formData, tracking_progress: parseInt(e.target.value) || 0 })}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600"
+                      disabled={formData.total_duration_days > 0}
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600 disabled:bg-gray-100 disabled:text-gray-500 disabled:cursor-not-allowed"
                     />
+                    <p className="text-xs text-gray-500 mt-1">
+                      {formData.total_duration_days > 0
+                        ? 'Calculée automatiquement selon la durée totale et la date de départ.'
+                        : 'Optionnel : laissez à 0 pour utiliser la progression automatique basée sur la durée totale.'}
+                    </p>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Durée totale du colis (en jours)
+                    </label>
+                    <input
+                      type="number"
+                      min={formData.transport_mode === 'sea' ? 30 : 0}
+                      max={formData.transport_mode === 'air' ? 7 : undefined}
+                      value={formData.total_duration_days}
+                      onChange={(e) => setFormData({ ...formData, total_duration_days: parseInt(e.target.value) || 0 })}
+                      className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 ${
+                        formErrors.total_duration_days
+                          ? 'border-red-500 focus:ring-red-600'
+                          : 'border-gray-300 focus:ring-blue-600'
+                      }`}
+                      placeholder={formData.transport_mode === 'air' ? 'Max 7 jours' : 'Min 30 jours'}
+                    />
+                    {formErrors.total_duration_days && (
+                      <p className="text-red-500 text-sm mt-1">{formErrors.total_duration_days}</p>
+                    )}
+                    <p className="text-xs text-gray-500 mt-1">
+                      {formData.transport_mode === 'air'
+                        ? '✈️ Mode aérien : durée maximale 7 jours.'
+                        : '🚢 Mode maritime : durée minimale 30 jours.'}
+                      {' '}La progression sera calculée automatiquement chaque jour à partir de la date de départ.
+                    </p>
+                    {formData.total_duration_days > 0 && !isValidISODate(formData.departure_date) && (
+                      <div className="mt-2 p-3 bg-yellow-50 border-l-4 border-yellow-400 rounded">
+                        <p className="text-sm text-yellow-800 font-medium">
+                          ⚠️ Date de départ requise
+                        </p>
+                        <p className="text-xs text-yellow-700 mt-1">
+                          Pour activer la progression automatique, veuillez d'abord renseigner une <strong>Date de départ</strong> valide ci-dessus.
+                        </p>
+                      </div>
+                    )}
                   </div>
 
                   {/* Insurances */}
