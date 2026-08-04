@@ -143,7 +143,12 @@ const SEA_EDGES: [string, string][] = [
 // Port côtier + nœud(s) d'entrée dans le réseau, par pays (ISO-2).
 // Plusieurs portes possibles : Dijkstra choisit la meilleure selon la destination.
 // Les pays enclavés utilisent le port du pays côtier voisin le plus proche.
-const COUNTRY_SEA: Record<string, { port: [number, number]; nodes: string[] }> = {
+// `inland` : pays enclavé — le navire s'arrête au port et le conteneur poursuit
+// par voie terrestre (rail/camion) jusqu'à ce hub intérieur, comme dans la réalité.
+const COUNTRY_SEA: Record<
+  string,
+  { port: [number, number]; nodes: string[]; inland?: [number, number] }
+> = {
   CN: { port: [31.1, 121.9], nodes: ['TAIWAN_STRAIT'] }, // Shanghai (embouchure du Yangtsé)
   HK: { port: [22.25, 114.2], nodes: ['HK_SEA'] },
   JP: { port: [35.2, 139.8], nodes: ['HK_SEA'] }, // Baie de Tokyo (route Pacifique sud de Taïwan)
@@ -170,11 +175,17 @@ const COUNTRY_SEA: Record<string, { port: [number, number]; nodes: string[] }> =
   TN: { port: [37.2, 10.4], nodes: ['MED_C'] }, // Tunis
   EG: { port: [31.4, 29.8], nodes: ['MED_E'] }, // Alexandrie
   KE: { port: [-4.2, 39.9], nodes: ['MADAGASCAR_E'] }, // Mombasa
+  // Enclavé : Mombasa -> Kampala par le Corridor Nord (rail SGR + route)
+  UG: { port: [-4.2, 39.9], nodes: ['MADAGASCAR_E'], inland: [0.35, 32.58] },
   ZA: { port: [-34.1, 18.3], nodes: ['CAPE'] }, // Le Cap
-  BF: { port: [5.5, 0.0], nodes: ['GULF_GUINEA', 'W_AFRICA'] }, // via Tema (enclavé)
-  ML: { port: [14.6, -17.6], nodes: ['DAKAR'] }, // via Dakar (enclavé)
-  TD: { port: [3.6, 9.3], nodes: ['GULF_GUINEA'] }, // via Douala (enclavé)
-  CF: { port: [3.6, 9.3], nodes: ['GULF_GUINEA'] }, // via Douala (enclavé)
+  // Tema -> Ouagadougou (corridor routier ghanéen)
+  BF: { port: [5.5, 0.0], nodes: ['GULF_GUINEA', 'W_AFRICA'], inland: [12.37, -1.53] },
+  // Dakar -> Bamako (corridor Dakar-Bamako)
+  ML: { port: [14.6, -17.6], nodes: ['DAKAR'], inland: [12.65, -8.0] },
+  // Douala -> N'Djaména (corridor Douala-Tchad)
+  TD: { port: [3.6, 9.3], nodes: ['GULF_GUINEA'], inland: [12.11, 15.05] },
+  // Douala -> Bangui (corridor Douala-Bangui)
+  CF: { port: [3.6, 9.3], nodes: ['GULF_GUINEA'], inland: [4.39, 18.56] },
   FR: { port: [49.6, -0.6], nodes: ['CHANNEL'] }, // Le Havre
   BE: { port: [51.4, 3.0], nodes: ['NORTH_SEA'] }, // Anvers
   NL: { port: [52.1, 3.9], nodes: ['NORTH_SEA'] }, // Rotterdam
@@ -264,14 +275,22 @@ function smoothRoute(points: [number, number][], perSegment = 14): [number, numb
 }
 
 const SEA_ALT = 0.006;
+const LAND_ALT = 0.008; // légèrement au-dessus du relief pour rester visible
 const AIR_ALT_BASE = 0.015;
 const AIR_ALT_CRUISE = 0.16;
+
+// `landStart` : fraction du trajet (0..1) à partir de laquelle on roule au lieu
+// de naviguer. 1 = pas de tronçon terrestre.
+interface Route {
+  path: PathPoint[];
+  landStart: number;
+}
 
 function buildRoute(
   from: { code: string; lat: number; lng: number },
   to: { code: string; lat: number; lng: number },
   isAir: boolean
-): PathPoint[] {
+): Route {
   if (isAir) {
     // Arc de grand cercle avec profil de vol : décollage, croisière, descente
     const n = 110;
@@ -282,7 +301,7 @@ function buildRoute(
       const alt = AIR_ALT_BASE + AIR_ALT_CRUISE * Math.sin(Math.PI * s) ** 0.8;
       pts.push([lat, lng, alt]);
     }
-    return pts;
+    return { path: pts, landStart: 1 };
   }
   // Maritime : port de départ -> couloirs de navigation -> port d'arrivée.
   // Le bateau ne passe jamais par le centre des pays (terres).
@@ -302,7 +321,19 @@ function buildRoute(
     ];
   }
   const perSegment = waypoints.length <= 2 ? 80 : 14;
-  return smoothRoute(waypoints, perSegment).map(([lat, lng]) => [lat, lng, SEA_ALT]);
+  const sea: PathPoint[] = smoothRoute(waypoints, perSegment).map(
+    ([lat, lng]) => [lat, lng, SEA_ALT]
+  );
+
+  // Destination enclavée : rupture de charge au port, puis tronçon terrestre.
+  const inland = toSea?.inland;
+  if (!inland) return { path: sea, landStart: 1 };
+
+  const land: PathPoint[] = smoothRoute([toSea.port, inland], 30)
+    .slice(1) // le port est déjà le dernier point maritime
+    .map(([lat, lng]) => [lat, lng, LAND_ALT]);
+  const path = [...sea, ...land];
+  return { path, landStart: (sea.length - 1) / (path.length - 1) };
 }
 
 function positionAlong(path: PathPoint[], t: number): PathPoint {
@@ -452,6 +483,44 @@ function buildShip(): THREE.Group {
   return g;
 }
 
+// Camion porte-conteneur : dernier tronçon terrestre vers les pays enclavés.
+// Même convention que les autres véhicules : l'avant pointe vers +Z.
+function buildTruck(): THREE.Group {
+  const g = new THREE.Group();
+
+  // Cabine à l'avant
+  const cab = new THREE.Mesh(new THREE.BoxGeometry(1.0, 0.85, 1.1), MAT.red());
+  cab.position.set(0, 0.85, 1.55);
+  g.add(cab);
+  const windshield = new THREE.Mesh(new THREE.BoxGeometry(0.92, 0.34, 0.06), MAT.navy());
+  windshield.position.set(0, 1.05, 2.11);
+  g.add(windshield);
+
+  // Châssis reliant cabine et remorque
+  const chassis = new THREE.Mesh(new THREE.BoxGeometry(0.85, 0.22, 3.6), MAT.steel());
+  chassis.position.set(0, 0.5, 0.1);
+  g.add(chassis);
+
+  // Remorque : le conteneur transporté
+  const container = new THREE.Mesh(new THREE.BoxGeometry(1.0, 0.9, 2.5), MAT.accent());
+  container.position.set(0, 1.05, -0.45);
+  g.add(container);
+
+  // Roues (paire avant + deux paires arrière)
+  const wheelGeo = new THREE.CylinderGeometry(0.28, 0.28, 0.18, 12);
+  wheelGeo.rotateZ(Math.PI / 2); // axe sur X
+  for (const z of [1.5, -0.6, -1.25]) {
+    for (const x of [-0.52, 0.52]) {
+      const wheel = new THREE.Mesh(wheelGeo, MAT.navy());
+      wheel.position.set(x, 0.28, z);
+      g.add(wheel);
+    }
+  }
+
+  g.scale.setScalar(1.9);
+  return g;
+}
+
 // ---------------------------------------------------------------------------
 // Composant
 // ---------------------------------------------------------------------------
@@ -512,8 +581,8 @@ export default function GlobeTracker({
       .catch(fallback);
   }, []);
 
-  const path = useMemo(
-    () => (from && to ? buildRoute(from, to, isAir) : []),
+  const { path, landStart } = useMemo(
+    () => (from && to ? buildRoute(from, to, isAir) : { path: [] as PathPoint[], landStart: 1 }),
     [from, to, isAir]
   );
 
@@ -526,6 +595,14 @@ export default function GlobeTracker({
     vehicleRef.current = vehicle;
     globe.scene().add(vehicle);
 
+    // Destination enclavée : un camion prend le relais après le port.
+    const hasLand = landStart < 1;
+    const truck = hasLand ? buildTruck() : null;
+    if (truck) {
+      truck.visible = false;
+      globe.scene().add(truck);
+    }
+
     const start = performance.now();
     let raf = 0;
     let lastSplit = 0;
@@ -537,24 +614,32 @@ export default function GlobeTracker({
       const eased = 1 - Math.pow(1 - p, 3); // ease-out cubic
       const t = eased * targetT;
 
-      const [lat, lng, alt0] = positionAlong(path, t);
-      // Tangage léger du navire sur l'eau ; l'avion reste stable
-      const bob = isAir ? 0 : Math.sin(now / 650) * 0.0012;
-      const alt = alt0 + bob;
+      // Après le port, c'est le camion qui roule et le navire reste amarré.
+      const onLand = hasLand && t > landStart;
+      const active = onLand && truck ? truck : vehicle;
+      if (truck) truck.visible = onLand;
 
-      const cur = globe.getCoords(lat, lng, alt);
-      curV.set(cur.x, cur.y, cur.z);
-      const [nlat, nlng, nalt] = positionAlong(path, Math.min(1, t + 0.008));
-      const next = globe.getCoords(nlat, nlng, nalt);
-      nextV.set(next.x, next.y, next.z);
+      // Place le véhicule actif sur sa portion : le navire se fige au port.
+      const place = (obj: THREE.Group, u: number, bob: number) => {
+        const [lat, lng, alt0] = positionAlong(path, u);
+        const cur = globe.getCoords(lat, lng, alt0 + bob);
+        curV.set(cur.x, cur.y, cur.z);
+        const [nlat, nlng, nalt] = positionAlong(path, Math.min(1, u + 0.008));
+        const next = globe.getCoords(nlat, nlng, nalt);
+        nextV.set(next.x, next.y, next.z);
+        obj.position.copy(curV);
+        if (curV.distanceToSquared(nextV) > 1e-6) {
+          // "haut" = normale à la sphère, +Z du modèle pointe vers la direction du trajet
+          obj.up.copy(curV).normalize();
+          obj.lookAt(nextV);
+        }
+      };
 
-      vehicle.position.copy(curV);
-      if (curV.distanceToSquared(nextV) > 1e-6) {
-        // "haut" = normale à la sphère, +Z du modèle pointe vers la direction du trajet
-        vehicle.up.copy(curV).normalize();
-        vehicle.lookAt(nextV);
-      }
-      if (!isAir) vehicle.rotation.z += Math.sin(now / 900) * 0.04; // roulis du navire
+      // Tangage léger du navire sur l'eau ; avion et camion restent stables
+      const bob = isAir || onLand ? 0 : Math.sin(now / 650) * 0.0012;
+      place(active, t, bob);
+      if (onLand) place(vehicle, landStart, 0); // navire à quai
+      if (!isAir && !onLand) vehicle.rotation.z += Math.sin(now / 900) * 0.04; // roulis
 
       // Découpe de trajectoire à basse fréquence
       if (now - lastSplit > 125) {
@@ -567,15 +652,18 @@ export default function GlobeTracker({
 
     return () => {
       cancelAnimationFrame(raf);
-      globe.scene().remove(vehicle);
-      vehicle.traverse((o) => {
-        if (o instanceof THREE.Mesh) {
-          o.geometry.dispose();
-          (Array.isArray(o.material) ? o.material : [o.material]).forEach((m) => m.dispose());
-        }
-      });
+      for (const obj of [vehicle, truck]) {
+        if (!obj) continue;
+        globe.scene().remove(obj);
+        obj.traverse((o) => {
+          if (o instanceof THREE.Mesh) {
+            o.geometry.dispose();
+            (Array.isArray(o.material) ? o.material : [o.material]).forEach((m) => m.dispose());
+          }
+        });
+      }
     };
-  }, [globeReady, path, targetT, isAir]);
+  }, [globeReady, path, targetT, isAir, landStart]);
 
   // --- Caméra : cadrage initial sur le milieu du trajet ---
   useEffect(() => {
@@ -614,7 +702,7 @@ export default function GlobeTracker({
       SN: ['Senegal'], GA: ['Gabon'], CG: ['Republic of the Congo', 'Congo'],
       CD: ['Democratic Republic of the Congo', 'Dem. Rep. Congo'], BJ: ['Benin'],
       TG: ['Togo'], BF: ['Burkina Faso'], ML: ['Mali'], MA: ['Morocco'],
-      DZ: ['Algeria'], TN: ['Tunisia'], EG: ['Egypt'], KE: ['Kenya'],
+      DZ: ['Algeria'], TN: ['Tunisia'], EG: ['Egypt'], KE: ['Kenya'], UG: ['Uganda'],
       ZA: ['South Africa'], GH: ['Ghana'], GN: ['Guinea'], MR: ['Mauritania'],
       TD: ['Chad'], CF: ['Central African Republic', 'Central African Rep.'],
       FR: ['France'], BE: ['Belgium'], NL: ['Netherlands'], DE: ['Germany'],

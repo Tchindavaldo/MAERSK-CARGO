@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Plus, Edit, Trash2, LogOut, Package, Upload, X, Settings, MessageCircle } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import Toast from '../components/Toast';
-import { COUNTRIES } from '../lib/countries';
+import CountrySelect from '../components/CountrySelect';
 
 interface Shipment {
   id: string;
@@ -878,24 +878,14 @@ export default function Admin() {
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Origin Country * 🌍
+                    Origin Country *
                   </label>
-                  <select
+                  <CountrySelect
                     value={formData.origin_country}
-                    onChange={(e) => setFormData({ ...formData, origin_country: e.target.value })}
-                    className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 ${
-                      formErrors.origin_country
-                        ? 'border-red-500 focus:ring-red-600'
-                        : 'border-gray-300 focus:ring-blue-600'
-                    }`}
-                  >
-                    <option value="">-- Sélectionner pays d'origine --</option>
-                    {COUNTRIES.map((c) => (
-                      <option key={c.code} value={c.code}>
-                        {c.name} ({c.code})
-                      </option>
-                    ))}
-                  </select>
+                    onChange={(code) => setFormData({ ...formData, origin_country: code })}
+                    placeholder="-- Sélectionner pays d'origine --"
+                    hasError={!!formErrors.origin_country}
+                  />
                   {formErrors.origin_country && (
                     <p className="text-red-500 text-sm mt-1">{formErrors.origin_country}</p>
                   )}
@@ -922,24 +912,14 @@ export default function Admin() {
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Destination Country * 🌍
+                    Destination Country *
                   </label>
-                  <select
+                  <CountrySelect
                     value={formData.destination_country}
-                    onChange={(e) => setFormData({ ...formData, destination_country: e.target.value })}
-                    className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 ${
-                      formErrors.destination_country
-                        ? 'border-red-500 focus:ring-red-600'
-                        : 'border-gray-300 focus:ring-blue-600'
-                    }`}
-                  >
-                    <option value="">-- Sélectionner pays de destination --</option>
-                    {COUNTRIES.map((c) => (
-                      <option key={c.code} value={c.code}>
-                        {c.name} ({c.code})
-                      </option>
-                    ))}
-                  </select>
+                    onChange={(code) => setFormData({ ...formData, destination_country: code })}
+                    placeholder="-- Sélectionner pays de destination --"
+                    hasError={!!formErrors.destination_country}
+                  />
                   {formErrors.destination_country && (
                     <p className="text-red-500 text-sm mt-1">{formErrors.destination_country}</p>
                   )}

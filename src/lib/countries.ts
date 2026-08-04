@@ -33,6 +33,7 @@ export const COUNTRIES: Country[] = [
   { code: 'TN', name: 'Tunisie', lat: 33.8869, lng: 9.5375 },
   { code: 'EG', name: 'Égypte', lat: 26.8206, lng: 30.8025 },
   { code: 'KE', name: 'Kenya', lat: -0.0236, lng: 37.9062 },
+  { code: 'UG', name: 'Ouganda', lat: 1.3733, lng: 32.2903 },
   { code: 'ZA', name: 'Afrique du Sud', lat: -30.5595, lng: 22.9375 },
   { code: 'GH', name: 'Ghana', lat: 7.9465, lng: -1.0232 },
   { code: 'GN', name: 'Guinée', lat: 9.9456, lng: -9.6966 },
