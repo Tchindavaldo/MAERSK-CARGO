@@ -95,7 +95,7 @@ function ProgressSection({ shipment }: { shipment: Shipment }) {
   ];
 
   return (
-    <div className="bg-white p-8 border-b border-gray-200">
+    <div className="bg-white p-3 sm:p-8 border-b border-gray-200">
       <style>{`
         @keyframes blink-day {
           0%, 100% { opacity: 1; transform: scale(1.4); box-shadow: 0 0 0 0 rgba(66, 176, 213, 0.7); }
@@ -103,18 +103,18 @@ function ProgressSection({ shipment }: { shipment: Shipment }) {
         }
         .blink-day { animation: blink-day 1s ease-in-out infinite; }
       `}</style>
-      <h3 className="text-2xl font-bold mb-6 text-center text-brand-dark">Package Tracking Progress</h3>
+      <h3 className="text-xl sm:text-2xl font-bold mb-4 sm:mb-6 text-center text-brand-dark">Package Tracking Progress</h3>
       <div className="max-w-4xl mx-auto">
-        <div className="flex justify-between mb-3">
+        <div className="flex justify-between mb-3 gap-1">
           {stages.map((s) => (
             <div
               key={s.key}
-              className={`flex-1 text-center transition-all ${
-                activeStage === s.key ? 'text-brand-accent font-bold scale-110' : 'text-gray-400'
+              className={`flex-1 min-w-0 text-center transition-all ${
+                activeStage === s.key ? 'text-brand-accent font-bold sm:scale-110' : 'text-gray-400'
               }`}
             >
-              <div className="text-2xl mb-2">{s.icon}</div>
-              <div className="text-xs font-semibold">{s.label}</div>
+              <div className="text-xl sm:text-2xl mb-1 sm:mb-2">{s.icon}</div>
+              <div className="text-[9px] leading-tight sm:text-xs font-semibold">{s.label}</div>
             </div>
           ))}
         </div>
@@ -291,11 +291,11 @@ export default function Track() {
         </div>
       </section>
 
-      <section className="py-16 -mt-10">
-        <div className="container mx-auto px-4">
-          <div className="max-w-6xl mx-auto shadow-2xl rounded-2xl bg-white overflow-hidden border border-gray-100 p-8">
+      <section className="py-10 sm:py-16 -mt-10">
+        <div className="container mx-auto px-2 sm:px-4">
+          <div className="max-w-6xl mx-auto shadow-2xl rounded-2xl bg-white overflow-hidden border border-gray-100 p-0 sm:p-8">
             
-            <form onSubmit={(e) => handleTrack(e)} className="max-w-3xl mx-auto mb-12">
+            <form onSubmit={(e) => handleTrack(e)} className="max-w-3xl mx-auto p-3 sm:p-0 mb-6 sm:mb-12">
               <div className="flex flex-col sm:flex-row gap-4">
                 <div className="flex-1 relative">
                   <input
@@ -325,9 +325,9 @@ export default function Track() {
                 {/* Visual Tracking Progress Bar + Globe */}
                 <ProgressSection shipment={shipment} />
 
-                <div className="bg-white p-8 border-b border-gray-200">
+                <div className="bg-white p-3 sm:p-8 border-b border-gray-200">
                   <div className="tracking-info-detail">
-                    <div className="tracking-box bg-gradient-to-br from-brand-light/50 to-gray-50 p-6 rounded-xl border-2 border-brand-accent/20 shadow-md">
+                    <div className="tracking-box bg-gradient-to-br from-brand-light/50 to-gray-50 p-4 sm:p-6 rounded-xl border-2 border-brand-accent/20 shadow-md">
                       <div className="tracking-time-box mb-4">
                         <div className="tracking-time text-xl font-bold text-brand-dark">
                           {shipment.status_date ? formatDate(shipment.status_date) : 'N/A'}
@@ -374,9 +374,9 @@ export default function Track() {
                   </div>
                 </div>
 
-                <div className="p-8">
+                <div className="p-3 sm:p-8">
                   <div className="flex items-center justify-center mb-10">
-                    <div className="bg-white p-6 rounded-xl border-2 border-brand-accent/30 shadow-lg hover:shadow-xl transition-shadow">
+                    <div className="bg-white p-4 sm:p-6 rounded-xl border-2 border-brand-accent/30 shadow-lg hover:shadow-xl transition-shadow">
                       {qrCodeUrl ? (
                         <div className="text-center">
                           <img
@@ -400,7 +400,7 @@ export default function Track() {
                   </div>
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-                    <div className="bg-white p-6 rounded-xl border-2 border-gray-200 hover:border-brand-accent/50 transition-all shadow-md hover:shadow-lg">
+                    <div className="bg-white p-4 sm:p-6 rounded-xl border-2 border-gray-200 hover:border-brand-accent/50 transition-all shadow-md hover:shadow-lg">
                       <h3 className="text-xl font-bold mb-5 flex items-center gap-2 text-brand-dark">
                         <User size={24} className="text-brand-accent" />
                         Shipper Information
@@ -425,7 +425,7 @@ export default function Track() {
                       </div>
                     </div>
 
-                    <div className="bg-white p-6 rounded-xl border-2 border-gray-200 hover:border-brand-accent/50 transition-all shadow-md hover:shadow-lg">
+                    <div className="bg-white p-4 sm:p-6 rounded-xl border-2 border-gray-200 hover:border-brand-accent/50 transition-all shadow-md hover:shadow-lg">
                       <h3 className="text-xl font-bold mb-5 flex items-center gap-2 text-brand-dark">
                         <User size={24} className="text-brand-accent" />
                         Receiver Information
@@ -451,7 +451,7 @@ export default function Track() {
                     </div>
                   </div>
 
-                  <div className="bg-white p-6 rounded-xl border-2 border-gray-200 shadow-md mb-8">
+                  <div className="bg-white p-4 sm:p-6 rounded-xl border-2 border-gray-200 shadow-md mb-8">
                     <h3 className="text-xl font-bold mb-5 text-brand-dark border-b-2 border-brand-accent/20 pb-3">Shipment Information</h3>
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                       <div>
@@ -536,7 +536,7 @@ export default function Track() {
 
                   {/* Image de l'envoi */}
                   {shipment.image_url && (
-                    <div className="bg-white p-6 rounded-xl border-2 border-gray-200 shadow-md mb-8">
+                    <div className="bg-white p-4 sm:p-6 rounded-xl border-2 border-gray-200 shadow-md mb-8">
                       <h3 className="text-xl font-bold mb-4 flex items-center gap-2 text-brand-dark">
                         <Package size={24} className="text-brand-accent" />
                         Shipment Image
@@ -550,7 +550,7 @@ export default function Track() {
                   )}
 
                   {/* Google Map de la Chine */}
-                  <div className="bg-white p-6 rounded-xl border-2 border-gray-200 shadow-md mb-8">
+                  <div className="bg-white p-4 sm:p-6 rounded-xl border-2 border-gray-200 shadow-md mb-8">
                     <h3 className="text-xl font-bold mb-5 flex items-center gap-2 text-brand-dark">
                       <MapPin size={24} className="text-brand-accent" />
                       Location Map - China

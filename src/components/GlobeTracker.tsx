@@ -527,6 +527,11 @@ function buildTruck(): THREE.Group {
 
 const EASE_MS = 3200; // durée de l'animation d'entrée du véhicule
 
+// Textures servies depuis `public/` : le CDN unpkg peut mettre plus d'une
+// minute à répondre, laissant le globe noir alors que la page semble prête.
+const EARTH_TEXTURE = '/globe/earth-blue-marble.jpg';
+const EARTH_BUMP = '/globe/earth-topology.png';
+
 export default function GlobeTracker({
   originCountry,
   destinationCountry,
@@ -538,8 +543,12 @@ export default function GlobeTracker({
   const vehicleRef = useRef<THREE.Group | null>(null);
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [countries, setCountries] = useState<any>({ features: [] });
-  const [size, setSize] = useState({ width: 1050, height: 720 });
+  const [size, setSize] = useState({ width: 1050, height: 735 });
   const [globeReady, setGlobeReady] = useState(false);
+  // La texture de la Terre pèse ~1,4 Mo : tant qu'elle n'est pas décodée, le
+  // globe est rendu noir. On la précharge pour garder le loader affiché
+  // jusqu'à ce qu'il y ait réellement quelque chose à voir.
+  const [textureReady, setTextureReady] = useState(false);
   // Découpe parcouru/restant, mise à jour à ~8 Hz pour ne pas reconstruire
   // les tubes de trajectoire à 60 fps
   const [displayT, setDisplayT] = useState(0);
@@ -554,7 +563,14 @@ export default function GlobeTracker({
     const update = () => {
       const w = containerRef.current?.clientWidth || window.innerWidth;
       const width = Math.min(1050, w);
-      setSize({ width, height: Math.round(width * 0.7) });
+      // Sur écran étroit, un cadre en 0.7 est trop plat : le globe y tient dans
+      // quelques dizaines de pixels et devient illisible. On passe alors à un
+      // format portrait borné par la hauteur de la fenêtre.
+      const ratio = width < 640 ? 1.3 : 0.7;
+      const height = Math.round(
+        Math.min(width * ratio, Math.max(380, window.innerHeight * 0.75))
+      );
+      setSize({ width, height });
     };
     update();
     window.addEventListener('resize', update);
@@ -563,22 +579,43 @@ export default function GlobeTracker({
 
   // --- Frontières des pays (topojson -> geojson) ---
   useEffect(() => {
-    const fallback = () =>
-      fetch('//raw.githubusercontent.com/datasets/geo-countries/master/data/countries.geojson')
+    // Les frontières sont servies en local : unpkg met parfois plus d'une
+    // minute à répondre, ce qui laissait le globe vide au premier chargement.
+    // Le CDN ne sert plus que de secours si le fichier local manque.
+    const load = (url: string) =>
+      fetch(url)
         .then((r) => r.json())
-        .then(setCountries)
-        .catch(() => undefined);
-    fetch('//unpkg.com/world-atlas/countries-110m.json')
-      .then((r) => r.json())
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      .then((topology: any) =>
-        // @ts-expect-error - pas de types pour topojson-client
-        import('topojson-client')
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          .then((topo: any) => setCountries(topo.feature(topology, topology.objects.countries)))
-          .catch(fallback)
-      )
-      .catch(fallback);
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        .then((topology: any) =>
+          // @ts-expect-error - pas de types pour topojson-client
+          import('topojson-client').then(
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            (topo: any) => setCountries(topo.feature(topology, topology.objects.countries))
+          )
+        );
+
+    load('/globe/countries-110m.json')
+      .catch(() => load('//unpkg.com/world-atlas/countries-110m.json'))
+      .catch(() => undefined);
+  }, []);
+
+  // --- Préchargement de la texture de la Terre ---
+  useEffect(() => {
+    const img = new Image();
+    // Même URL que le globe : le navigateur sert le second accès depuis le cache.
+    img.src = EARTH_TEXTURE;
+    const done = () => setTextureReady(true);
+    if (img.complete) {
+      done();
+      return;
+    }
+    img.addEventListener('load', done);
+    // En cas d'échec on affiche quand même le globe plutôt que de bloquer le loader.
+    img.addEventListener('error', done);
+    return () => {
+      img.removeEventListener('load', done);
+      img.removeEventListener('error', done);
+    };
   }, []);
 
   const { path, landStart } = useMemo(
@@ -678,8 +715,11 @@ export default function GlobeTracker({
       controls.minDistance = 140;
     }
     const [midLat, midLng] = greatCircle(from, to, 0.5);
-    globe.pointOfView({ lat: midLat, lng: midLng, altitude: 2.1 }, 1800);
-  }, [globeReady, from, to]);
+    // Le champ de vision est vertical : sur mobile le cadre est en portrait,
+    // donc la hauteur suffit et on peut se rapprocher davantage qu'en desktop.
+    const altitude = size.width < 640 ? 1.75 : 2.1;
+    globe.pointOfView({ lat: midLat, lng: midLng, altitude }, 1800);
+  }, [globeReady, from, to, size.width]);
 
   // --- Trajectoires parcourue / restante ---
   const { traveled, remaining } = useMemo(() => {
@@ -732,7 +772,8 @@ export default function GlobeTracker({
     );
   }
 
-  const isLoading = !countries.features || countries.features.length === 0;
+  const isLoading =
+    !textureReady || !countries.features || countries.features.length === 0;
   const pct = Math.round(displayT * 100);
 
   return (
@@ -756,15 +797,15 @@ export default function GlobeTracker({
       )}
 
       {/* HUD : itinéraire + progression */}
-      <div className="absolute top-4 left-4 z-10 bg-brand-dark/70 backdrop-blur-md border border-white/10 rounded-xl px-4 py-3 text-xs text-gray-200 pointer-events-none select-none">
-        <div className="flex items-center gap-2 font-semibold text-sm text-white">
-          <span className="w-2 h-2 rounded-full bg-green-400 shadow-[0_0_6px_#4ade80]"></span>
+      <div className="absolute top-2 left-2 sm:top-4 sm:left-4 z-10 max-w-[calc(100%-1rem)] bg-brand-dark/70 backdrop-blur-md border border-white/10 rounded-xl px-2.5 py-2 sm:px-4 sm:py-3 text-xs text-gray-200 pointer-events-none select-none">
+        <div className="flex flex-wrap items-center gap-x-2 gap-y-1 font-semibold text-xs sm:text-sm text-white">
+          <span className="w-2 h-2 shrink-0 rounded-full bg-green-400 shadow-[0_0_6px_#4ade80]"></span>
           {from.name}
-          <span className="text-brand-accent mx-1">{isAir ? '✈' : '⚓'}</span>
-          <span className="w-2 h-2 rounded-full bg-brand-accent shadow-[0_0_6px_#42B0D5]"></span>
+          <span className="text-brand-accent">{isAir ? '✈' : '⚓'}</span>
+          <span className="w-2 h-2 shrink-0 rounded-full bg-brand-accent shadow-[0_0_6px_#42B0D5]"></span>
           {to.name}
         </div>
-        <div className="mt-2 flex items-center gap-2 text-gray-300">
+        <div className="mt-1.5 sm:mt-2 flex items-center gap-2 text-gray-300">
           <span className="uppercase tracking-wider text-[10px]">
             {isAir ? 'Fret aérien' : 'Fret maritime'}
           </span>
@@ -785,8 +826,8 @@ export default function GlobeTracker({
         width={size.width}
         height={size.height}
         backgroundColor="rgba(0,0,0,0)"
-        globeImageUrl="//unpkg.com/three-globe/example/img/earth-blue-marble.jpg"
-        bumpImageUrl="//unpkg.com/three-globe/example/img/earth-topology.png"
+        globeImageUrl={EARTH_TEXTURE}
+        bumpImageUrl={EARTH_BUMP}
         atmosphereColor="#42B0D5"
         atmosphereAltitude={0.16}
         onGlobeReady={() => setGlobeReady(true)}
