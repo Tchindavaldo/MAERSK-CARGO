@@ -1,25 +1,20 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import Expired from './pages/Expired';
-// Blocage general du site (version gratuite Vercel expiree).
-// Pour reactiver le site : decommenter les imports et routes ci-dessous
-// et retirer la route Expired.
-// import Home from './pages/Home';
-// import About from './pages/About';
-// import Services from './pages/Services';
-// import Contact from './pages/Contact';
-// import Track from './pages/Track';
-// import Login from './pages/Login';
-// import Admin from './pages/Admin';
-// import Blog from './pages/Blog';
-// import Network from './pages/Network';
-// import TermsAndConditions from './pages/TermsAndConditions';
+import Home from './pages/Home';
+import About from './pages/About';
+import Services from './pages/Services';
+import Contact from './pages/Contact';
+import Track from './pages/Track';
+import Login from './pages/Login';
+import Admin from './pages/Admin';
+import Blog from './pages/Blog';
+import Network from './pages/Network';
+import TermsAndConditions from './pages/TermsAndConditions';
 
 function App() {
   return (
     <Router>
       <Routes>
-        <Route path="*" element={<Expired />} />
-        {/* <Route path="/" element={<Home />} />
+        <Route path="/" element={<Home />} />
         <Route path="/about" element={<About />} />
         <Route path="/services" element={<Services />} />
         <Route path="/contact" element={<Contact />} />
@@ -28,7 +23,7 @@ function App() {
         <Route path="/network" element={<Network />} />
         <Route path="/login" element={<Login />} />
         <Route path="/admin" element={<Admin />} />
-        <Route path="/terms-and-conditions" element={<TermsAndConditions />} /> */}
+        <Route path="/terms-and-conditions" element={<TermsAndConditions />} />
       </Routes>
     </Router>
   );
