@@ -38,6 +38,7 @@ export const COUNTRIES: Country[] = [
   { code: 'GH', name: 'Ghana', lat: 7.9465, lng: -1.0232 },
   { code: 'GN', name: 'Guinée', lat: 9.9456, lng: -9.6966 },
   { code: 'MR', name: 'Mauritanie', lat: 21.0079, lng: -10.9408 },
+  { code: 'NE', name: 'Niger', lat: 17.6078, lng: 8.0817 },
   { code: 'TD', name: 'Tchad', lat: 15.4542, lng: 18.7322 },
   { code: 'CF', name: 'Centrafrique', lat: 6.6111, lng: 20.9394 },
   // Europe

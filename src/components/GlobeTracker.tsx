@@ -182,6 +182,8 @@ const COUNTRY_SEA: Record<
   BF: { port: [5.5, 0.0], nodes: ['GULF_GUINEA', 'W_AFRICA'], inland: [12.37, -1.53] },
   // Dakar -> Bamako (corridor Dakar-Bamako)
   ML: { port: [14.6, -17.6], nodes: ['DAKAR'], inland: [12.65, -8.0] },
+  // Cotonou -> Niamey (corridor Cotonou-Niamey)
+  NE: { port: [6.2, 2.4], nodes: ['GULF_GUINEA'], inland: [13.51, 2.11] },
   // Douala -> N'Djaména (corridor Douala-Tchad)
   TD: { port: [3.6, 9.3], nodes: ['GULF_GUINEA'], inland: [12.11, 15.05] },
   // Douala -> Bangui (corridor Douala-Bangui)
