@@ -329,13 +329,48 @@ function buildRoute(
 
   // Destination enclavée : rupture de charge au port, puis tronçon terrestre.
   const inland = toSea?.inland;
-  if (!inland) return { path: sea, landStart: 1 };
+  if (!inland) return { path: resampleByDistance(sea, 400), landStart: 1 };
 
   const land: PathPoint[] = smoothRoute([toSea.port, inland], 30)
     .slice(1) // le port est déjà le dernier point maritime
     .map(([lat, lng]) => [lat, lng, LAND_ALT]);
-  const path = [...sea, ...land];
-  return { path, landStart: (sea.length - 1) / (path.length - 1) };
+  // Le tronçon terrestre démarre à la fraction de *distance* où se trouve le port.
+  const seaLen = pathLength(sea);
+  const total = seaLen + pathLength([sea[sea.length - 1], ...land]);
+  const path = resampleByDistance([...sea, ...land], 400);
+  return { path, landStart: total > 0 ? seaLen / total : 1 };
+}
+
+function pathLength(pts: PathPoint[]): number {
+  let d = 0;
+  for (let i = 1; i < pts.length; i++)
+    d += haversineDeg([pts[i - 1][0], pts[i - 1][1]], [pts[i][0], pts[i][1]]);
+  return d;
+}
+
+// Rééchantillonne la polyligne à pas de distance constant : la progression (%)
+// devient proportionnelle à la distance parcourue. Sans cela, un court tronçon
+// (sortie de port, détroit) durait autant qu'une traversée d'océan et le
+// navire semblait bloqué plusieurs jours au même endroit.
+function resampleByDistance(pts: PathPoint[], n: number): PathPoint[] {
+  if (pts.length < 2) return pts;
+  const cum = [0];
+  for (let i = 1; i < pts.length; i++)
+    cum.push(cum[i - 1] + haversineDeg([pts[i - 1][0], pts[i - 1][1]], [pts[i][0], pts[i][1]]));
+  const total = cum[cum.length - 1];
+  if (total === 0) return pts;
+  const out: PathPoint[] = [];
+  let j = 0;
+  for (let k = 0; k <= n; k++) {
+    const target = (k / n) * total;
+    while (j < pts.length - 2 && cum[j + 1] < target) j++;
+    const seg = cum[j + 1] - cum[j];
+    const f = seg > 0 ? (target - cum[j]) / seg : 0;
+    const a = pts[j];
+    const b = pts[j + 1];
+    out.push([a[0] + (b[0] - a[0]) * f, a[1] + (b[1] - a[1]) * f, a[2] + (b[2] - a[2]) * f]);
+  }
+  return out;
 }
 
 function positionAlong(path: PathPoint[], t: number): PathPoint {
@@ -746,7 +781,7 @@ export default function GlobeTracker({
       TG: ['Togo'], BF: ['Burkina Faso'], ML: ['Mali'], MA: ['Morocco'],
       DZ: ['Algeria'], TN: ['Tunisia'], EG: ['Egypt'], KE: ['Kenya'], UG: ['Uganda'],
       ZA: ['South Africa'], GH: ['Ghana'], GN: ['Guinea'], MR: ['Mauritania'],
-      TD: ['Chad'], CF: ['Central African Republic', 'Central African Rep.'],
+      NE: ['Niger'], TD: ['Chad'], CF: ['Central African Republic', 'Central African Rep.'],
       FR: ['France'], BE: ['Belgium'], NL: ['Netherlands'], DE: ['Germany'],
       IT: ['Italy'], ES: ['Spain'], GB: ['United Kingdom'],
       US: ['United States of America', 'United States'], CA: ['Canada'], BR: ['Brazil'],
